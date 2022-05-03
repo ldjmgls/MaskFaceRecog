@@ -1,1 +1,3 @@
-"""Model Architecture"""
+"""
+Model Architecture
+"""
