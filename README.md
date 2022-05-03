@@ -17,3 +17,7 @@ If we go for Colab first and if we have time at the latter stage, we could make 
 . <br>
 . <br>
 Feel free to add any files! <br>
+
+
+## References
+[FocusFace Official Repo](https://github.com/NetoPedro/FocusFace)
