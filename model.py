@@ -57,10 +57,11 @@ class EmbeddingHead(nn.Module):
 class ArcFace(nn.Module):
     """
     Implementation of large margin arc distance
-        https://github.com/ronghuaiyang/arcface-pytorch.git -> models/metrics.py
-        https://github.com/foamliu/InsightFace-v2.git -> models.py
-        https://github.com/deepinsight/insightface.git -> recognition/arcface_torch/losses.py
-        https://github.com/TreB1eN/InsightFace_Pytorch.git -> model.py
+        [References]
+        - https://github.com/ronghuaiyang/arcface-pytorch.git -> models/metrics.py
+        - https://github.com/foamliu/InsightFace-v2.git -> models.py
+        - https://github.com/deepinsight/insightface.git -> recognition/arcface_torch/losses.py
+        - https://github.com/TreB1eN/InsightFace_Pytorch.git -> model.py
 
     Args:
         in_features: (int) size of each input sample, embedding size
