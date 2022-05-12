@@ -1,7 +1,6 @@
 """
 Bakbone Networks: Improved ResNet
 """
-from unicodedata import name
 import torch 
 import torch.nn as nn
 
@@ -171,10 +170,10 @@ class IResNet(nn.Module):
         
         return x
 
-def _iresnet(name, block, layers, pretrained, progress, **kwargs):
+def _iresnet(architec, block, layers, pretrained, progress, **kwargs):
     model = IResNet(block, layers, **kwargs)
     if pretrained:
-        model.load_state_dict(torch.load(model_paths[name]))
+        model.load_state_dict(torch.load(model_paths[architec]))
         # raise ValueError()
 
     return model
