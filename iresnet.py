@@ -1,5 +1,8 @@
 """
 Bakbone Networks: Improved ResNet
+    [References]
+    - https://github.com/deepinsight/insightface.git -> recognition/arcface_torch/backbones/iresnet.py
+    - https://github.com/iduta/iresnet.git -> models/iresnet.py
 """
 import torch 
 import torch.nn as nn
