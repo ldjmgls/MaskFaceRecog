@@ -11,8 +11,11 @@ If we go for Colab first and if we have time at the latter stage, we could make 
 
 `main.py`: end-to-end training and evaluation on the datasets using our model <br>
 `dataloader.py`: load masked/unmasked face image dataset <br>
-`train.py`: train the model <br>
+`trainer.py`: train the model <br>
 `eval.py`: evaluate the model <br>
+`iresnet.py`: Backbone networks - Improved ResNet <br>
+`model.py`: FocusFace architecture <br>
+`metrics.py`: computation of evaluation metrics <br>
 . <br>
 . <br>
 . <br>
