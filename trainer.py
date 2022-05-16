@@ -91,6 +91,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
                             is_best = is_best, 
                             checkpoint = model_dir)
         if fmr100 < best_score:
+            logging.info("- Found new best fmr100")
             best_score = fmr100
             patience = 1
         else:
