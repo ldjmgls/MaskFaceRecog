@@ -9,7 +9,7 @@ We can first write codes on Colab notebooks perhaps that's more straightforward!
 Directly writing codes for each part in its corresponding python file, which I created, is also fine. <br>
 If we go for Colab first and if we have time at the latter stage, we could make the entire code more organized by filling in those python scripts. <br>
 
-`main.py`: end-to-end training and evaluation on the datasets using our model <br>
+`main.py`: ~~end-to-end training and evaluation on the datasets using our model~~ Ignore this for now <br>
 `dataloader.py`: load masked/unmasked face image dataset <br>
 `trainer.py`: train the model <br>
 `eval.py`: evaluate the model <br>
