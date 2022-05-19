@@ -11,6 +11,7 @@ import torch
 import utils
 import model
 import dataloader
+from metrics import evaluate_metrics
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_dir", default = "data/val",
@@ -20,13 +21,31 @@ parser.add_argument("--model_dir", default = "",
 parser.add_argument("--pretrained", default = "None",
                     help = "Optional, filename in --model_dir containing weights to load")  # 'best' or 'train'
 
+def generate_gscore():
+    """
+    TODO: Genuine match scores are obtained by matching feature sets of the same class (same person)
+    """
+    pass
+
+def generate_iscore():
+    """
+    TODO: Impostor matching scores are obtained by matching feature sets of different classes (different persons)
+    """
+    pass
 
 def evaluate(net, data_loader, ):
     net.eval()
     with torch.no_grad():
-        pass
+        gscores = []
+        iscores = []
 
-    logging.info("Validation AUC: {:.3f}".format())
+        for (idx, (x_batch, y_batch)) in enumerate(data_loader):
+            y_pred = net(x_batch)
+            gscores.append(generate_gscore(y_pred, y_batch))
+            iscores.append(generate_iscore(y_pred, y_batch))
+
+    evaluate_metrics(gscores, iscores, clf_name='A', print_results=True)
+    # logging.info("Validation AUC: {:.3f}".format())
     # print("Validation AUC: {:.3f}".format())
 
 
