@@ -21,9 +21,9 @@ from eval import evaluate
 from metrics import calculate_metrics
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--data_dir", default = "data/faces_emore",
+parser.add_argument("--data_dir", default = "data",
                     help = "Directory containing the dataset")
-parser.add_argument("--model_dir", default = "",
+parser.add_argument("--model_dir", default = "result/base_model",
                     help = "Directory saving the model and log files")
 parser.add_argument("--pretrained", default = None,
                     help = "Optional, filename in --model_dir containing weights to reload before \
@@ -48,15 +48,16 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
     best_score = 100
     rate_decrease = 1
     patience = 1
+    total_step = len(train_loader)
 
     for epoch in range(n_epochs):
-        logging.info("Epoch {} / {}".format(epoch + 1, n_epochs))
+        logging.info("Epoch [{}/{}]".format(epoch + 1, n_epochs))
         net.train()
-
+        total_loss = 0
         # Use tqdm for progress bar
         with tqdm(total = len(train_loader)) as t_loader:
             for i, sample in enumerate(t_loader):
-                t_loader.set_description("Epoch: {} / {}".format(epoch + 1, n_epochs))
+                t_loader.set_description("Epoch [{}/{}]".format(epoch + 1, n_epochs))
                 input = sample["img"]
                 input_masked = sample["img_masked"]
                 label_id = sample["identity"]
@@ -74,18 +75,21 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
                 loss *= MSE(embed1, embed1_m) / 3
                 loss.backward()
                 optimizer.step()
-
-                # loss for each batch
-                t_loader.set_postfix("Training loss: {:.3f}".format())
+            
+                total_loss += loss.item()
+                # 293 batches (batch_size = 256), print out loss every 70 batches
+                if (i + 1) % 70 == 0:
+                    t_loader.set_postfix("Step [{}/{}], Loss: {:.3f}".format(i + 1, total_step, loss.item()))
+                    logging.info("- Step [{}/{}], Loss: {:.3f}".format(i + 1, total_step, loss.item()))
         
-        # average loss for whole training data <- sum(loss per batch) / # of batch
-        # logging.info("- Train metrics: " + metrics_string)
+        # average loss for whole training data: sum(loss per batch) / # of batch
+        logging.info("- Training loss: {}".format(total_loss / total_step))
         
         # Run for 1 epoch on validation set
         fmr100 = evaluate(net, val_loader, )
         is_best = fmr100 < best_score
         # Save weights
-        utils.save_checkpoint({'epoch': epoch + 1,
+        utils.save_checkpoint({'epoch': epoch + 1, 
                             'state_dict': net.state_dict(),
                             'optim_dict': optimizer.state_dict()}, 
                             is_best = is_best, 
@@ -99,7 +103,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
                 patience = 1
                 rate_decrease /= 10
                 optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
-                print("- New Learning Rate")
+                logging.info("- New Learning Rate")
             else: patience -= 1          
 
         logging.info("Finish training!")
@@ -126,7 +130,7 @@ if __name__ == '__main__':
 
     # get dataloaders
     batch_size = 256
-    workers = 4
+    workers = 2
     logging.info("Loading the datasets ...")
     train_loader, val_loader, classes = dataloader.fetch_dataloader(args.data_dir, batch_size, workers)
     logging.info("- Done.")
