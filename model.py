@@ -12,7 +12,7 @@ class FocusFace(nn.Module):
         super(FocusFace, self).__init__()
         self.model = iresnet.iresnet50()
         self.model.fc = EmbeddingHead(512, 32)
-        self.fc1 = ArcFace(512, identities, s = 64, m = 0.5)
+        self.fc1 = ArcFace(512, identities, scale = 64, margin = 0.5)
         self.fc2 = nn.Linear(32, 2)
         self.relu = nn.ReLU()
         
