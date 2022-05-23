@@ -58,10 +58,10 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
         with tqdm(total = len(train_loader)) as t_loader:
             for i, sample in enumerate(t_loader):
                 t_loader.set_description("Epoch [{}/{}]".format(epoch + 1, n_epochs))
-                input = sample["img"]
-                input_masked = sample["img_masked"]
-                label_id = sample["identity"]
-                label_mask = sample["mask"]
+                input = sample["unmasked"]
+                input_masked = sample["masked"]
+                label_id = sample["target"]
+                label_mask = sample["is_mask"]
                 input, input_masked, label_id, label_mask = input.to(device), input_masked.to(device), label_id.to(device), label_mask.to(device)
                 
                 optimizer.zero_grad()
@@ -86,25 +86,26 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
         logging.info("- Training loss: {}".format(total_loss / total_step))
         
         # Run for 1 epoch on validation set
-        fmr100 = evaluate(net, val_loader, )
-        is_best = fmr100 < best_score
+        # fmr100 = evaluate(net, val_loader, )
+        # is_best = fmr100 < best_score
+        is_best = False
         # Save weights
         utils.save_checkpoint({'epoch': epoch + 1, 
                             'state_dict': net.state_dict(),
                             'optim_dict': optimizer.state_dict()}, 
                             is_best = is_best, 
                             checkpoint = model_dir)
-        if fmr100 < best_score:
-            logging.info("- Found new best fmr100")
-            best_score = fmr100
-            patience = 1
-        else:
-            if patience == 0:
-                patience = 1
-                rate_decrease /= 10
-                optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
-                logging.info("- New Learning Rate")
-            else: patience -= 1          
+        # if fmr100 < best_score:
+        #     logging.info("- Found new best fmr100")
+        #     best_score = fmr100
+        #     patience = 1
+        # else:
+        #     if patience == 0:
+        #         patience = 1
+        #         rate_decrease /= 10
+        #         optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
+        #         logging.info("- New Learning Rate")
+        #     else: patience -= 1          
 
         logging.info("Finish training!")
 
@@ -132,7 +133,7 @@ if __name__ == '__main__':
     batch_size = 256
     workers = 2
     logging.info("Loading the datasets ...")
-    train_loader, val_loader, classes = dataloader.fetch_dataloader(args.data_dir, batch_size, workers)
+    train_loader, val_loader, classes = dataloader.create_dataloader(args.data_dir, batch_size, workers)
     logging.info("- Done.")
 
     # no. of classes (people identities)
