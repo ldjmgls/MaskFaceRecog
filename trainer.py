@@ -18,7 +18,7 @@ import torch.nn as nn
 import torch.optim as optim
 
 from eval import evaluate
-from metrics import calculate_metrics
+# from metrics import calculate_metrics
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--data_dir", default = "data",
