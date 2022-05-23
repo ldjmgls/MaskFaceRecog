@@ -35,7 +35,8 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
         pretrained: (string) optional- name of file to restore from (without its extension .pth.tar)
     """
     # Initilization    
-    param = list(net.module.model.parameters()) + list(net.module.fc1.parameters()) + list(net.module.fc2.parameters())
+    # param = list(net.module.model.parameters()) + list(net.module.fc1.parameters()) + list(net.module.fc2.parameters())
+    param = list(net.model.parameters()) + list(net.fc1.parameters()) + list(net.fc2.parameters())
     optimizer = optim.SGD(param, lr = lr, weight_decay = 5e-4, momentum = 0.9)
     criterion = nn.CrossEntropyLoss()
     MSE = nn.MSELoss()
@@ -56,7 +57,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
         total_loss = 0
         # Use tqdm for progress bar
         with tqdm(total = len(train_loader)) as t_loader:
-            for i, sample in enumerate(t_loader):
+            for i, sample in enumerate(train_loader):
                 t_loader.set_description("Epoch [{}/{}]".format(epoch + 1, n_epochs))
                 input = sample["unmasked"]
                 input_masked = sample["masked"]

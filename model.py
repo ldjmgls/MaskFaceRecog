@@ -95,7 +95,7 @@ class ArcFace(nn.Module):
         if self.easy_margin:
             phi = torch.where(cosine > 0, phi, cosine)
         else:
-            phi = torch.where(cosine > self.th, phi, cosine - self.mm)
+            phi = torch.where(cosine > self.theta, phi, cosine - self.mm)
         # --------------------------- convert label to one-hot ---------------------------
         one_hot = torch.zeros(cosine.size(), device = label.device)
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
