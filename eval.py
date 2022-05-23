@@ -63,8 +63,7 @@ def evaluate(net, data_loader, batch_size, data_set):
                 _embeddings = y_pred.detach().cpu().numpy()
 
                 if _embeddings is None:
-                    embeddings = np.zeros(
-                        (data.shape[0], _embeddings.shape[1]))
+                    embeddings = np.zeros((data.shape[0], _embeddings.shape[1]))
 
                 embeddings[start:end, :] = _embeddings[(batch_size - count):, :]
                 start = end
