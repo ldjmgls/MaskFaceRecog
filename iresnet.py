@@ -12,8 +12,8 @@ __all__ = ["iresnet18", "iresnet34", "iresnet50", "iresnet101"]
 model_paths = {
     "iresnet18": "", 
     "iresnet34": "", 
-    "iresnet50": "", 
-    "iresnet101": ""
+    "iresnet50": "pretrained/iresnet50.pth", 
+    "iresnet101": "pretrained/iresnet101.pth"
 }
 
 def conv3x3(in_planes, out_planes, stride = 1, groups = 1, dilation = 1):

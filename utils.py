@@ -44,10 +44,10 @@ def save_checkpoint(state, is_best, checkpoint):
     """
     filepath = os.path.join(checkpoint, 'last.pth.tar')
     if not os.path.exists(checkpoint):
-        print("Checkpoint Directory does not exist! Making directory {}".format(checkpoint))
+        logging.info("- Checkpoint Directory does not exist! Making directory {}".format(checkpoint))
         os.mkdir(checkpoint)
     else:
-        print("Checkpoint Directory exists!")
+        logging.info("- Checkpoint Directory exists!")
     torch.save(state, filepath)
     logging.info("- Save the latest model!")
     if is_best:

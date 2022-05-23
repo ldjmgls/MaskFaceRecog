@@ -12,7 +12,7 @@ class FocusFace(nn.Module):
         super(FocusFace, self).__init__()
         self.model = iresnet.iresnet50()
         self.model.fc = EmbeddingHead(512, 32)
-        self.fc1 = ArcFace(512, identities, s = 64, m = 0.5)
+        self.fc1 = ArcFace(512, identities, scale = 64, margin = 0.5)
         self.fc2 = nn.Linear(32, 2)
         self.relu = nn.ReLU()
         
@@ -95,7 +95,7 @@ class ArcFace(nn.Module):
         if self.easy_margin:
             phi = torch.where(cosine > 0, phi, cosine)
         else:
-            phi = torch.where(cosine > self.th, phi, cosine - self.mm)
+            phi = torch.where(cosine > self.theta, phi, cosine - self.mm)
         # --------------------------- convert label to one-hot ---------------------------
         one_hot = torch.zeros(cosine.size(), device = label.device)
         one_hot.scatter_(1, label.view(-1, 1).long(), 1)
