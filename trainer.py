@@ -133,7 +133,7 @@ if __name__ == '__main__':
     batch_size = 256
     workers = 2
     logging.info("Loading the datasets ...")
-    train_loader, val_loader, classes = dataloader.create_dataloader(args.data_dir, batch_size, workers)
+    train_loader, val_loader = dataloader.create_dataloader(args.data_dir, batch_size, workers)
     logging.info("- Done.")
 
     # no. of classes (people identities)
