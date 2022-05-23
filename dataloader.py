@@ -29,8 +29,7 @@ def create_dataloader(data_path, batch_size, workers):
     ])
 
     train_loader, val_loader = loader(PairDataset(train_path, img_transform)), loader(PairDataset(val_path, img_transform))
-    for mimage, uimage, label in train_loader:
-        print(mimage, uimage, label)
+    
 
     return train_loader, val_loader
 
@@ -55,13 +54,10 @@ class PairDataset(ImageFolder):
         original_path = path
         try: 
             masked_sample, unmasked_sample = self.transform(self.loader(path)), self.transform(self.loader(path.replace('.jpg', '_N95.jpg')))
-            sample = {'masked': masked_sample, 'unmasked': unmasked_sample, 'target' : target}
-            sample = (masked_sample, unmasked_sample, target)
+            sample = {'masked': masked_sample, 'unmasked': unmasked_sample, 'target' : target, 'is_mask' : 1}
         except:
             masked_sample, unmasked_sample = self.transform(self.loader(path.replace('_N95.jpg', '.jpg'))), self.transform(self.loader(path))
-            sample = {'masked': masked_sample, 'unmasked': unmasked_sample, 'target' : target}
-            sample = (masked_sample, unmasked_sample, target)
-        print(sample)
+            sample = {'masked': masked_sample, 'unmasked': unmasked_sample, 'target' : target, 'is_mask' : 1}
         return sample
 
      #   if self.transform is not None:
