@@ -80,11 +80,11 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
                 total_loss += loss.item()
                 # 293 batches (batch_size = 256), print out loss every 70 batches
                 if (i + 1) % 70 == 0:
-                    t_loader.set_postfix("Step [{}/{}], Loss: {:.3f}".format(i + 1, total_step, loss.item()))
-                    logging.info("- Step [{}/{}], Loss: {:.3f}".format(i + 1, total_step, loss.item()))
+                    t_loader.set_postfix("Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
+                    logging.info("- Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
         
         # average loss for whole training data: sum(loss per batch) / # of batch
-        logging.info("- Training loss: {}".format(total_loss / total_step))
+        logging.info("- Training loss: {:.5f}".format(total_loss / total_step))
         
         # Run for 1 epoch on validation set
         # fmr100 = evaluate(net, val_loader, )
@@ -108,7 +108,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
         #         logging.info("- New Learning Rate")
         #     else: patience -= 1          
 
-        logging.info("Finish training!")
+    logging.info("Finish training!")
 
 
 if __name__ == '__main__':
