@@ -68,8 +68,8 @@ def load_checkpoint(checkpoint, model, optimizer = None):
         raise("File doesn't exist {}".format(checkpoint))
     checkpoint = torch.load(checkpoint)
     model.load_state_dict(checkpoint['state_dict'])
-
     if optimizer:
         optimizer.load_state_dict(checkpoint['optim_dict'])
+    epochs = checkpoint['epoch']
 
-    return checkpoint
+    return checkpoint, epochs

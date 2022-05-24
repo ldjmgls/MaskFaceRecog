@@ -44,7 +44,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
         pretrain_path = os.path.join(
             model_dir, pretrained + ".pth.tar")
         logging.info("Loading parameters from {}".format(pretrain_path))
-        utils.load_checkpoint(pretrain_path, net, optimizer)
+        _, epochs_trained = utils.load_checkpoint(pretrain_path, net, optimizer)
 
     best_score = 100
     rate_decrease = 1
@@ -56,32 +56,35 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
         net.train()
         total_loss = 0
         # Use tqdm for progress bar
-        with tqdm(total = len(train_loader)) as t_loader:
-            for i, sample in enumerate(train_loader):
-                t_loader.set_description("Epoch [{}/{}]".format(epoch + 1, n_epochs))
-                input = sample["unmasked"]
-                input_masked = sample["masked"]
-                label_id = sample["target"]
-                label_mask = sample["is_mask"]
-                input, input_masked, label_id, label_mask = input.to(device), input_masked.to(device), label_id.to(device), label_mask.to(device)
-                
-                optimizer.zero_grad()
-                # unmasked: L_arc + lambda * L_ce
-                output, embed1, embed2, mask = net(input, label_id)
-                loss = criterion(output, label_id) + 0.1 * criterion(mask * 0, label_mask)
-                # masked: L_arc + lambda * L_ce
-                output_m, embed1_m, embed2_m, mask_m = net(input_masked, label_id)
-                loss += criterion(output_m, label_id) + 0.1 * criterion(mask_m, label_mask)
-                loss /= 2
-                loss *= MSE(embed1, embed1_m) / 3
-                loss.backward()
-                optimizer.step()
+        # with tqdm(total = len(train_loader)) as t_loader:
+            # for i, sample in enumerate(train_loader):
+        t_loader = tqdm(train_loader)
+        for i, sample in enumerate(t_loader, 0):
+            # t_loader.set_description("Epoch [{}/{}]".format(epoch + 1, n_epochs))
+            input = sample["unmasked"]
+            input_masked = sample["masked"]
+            label_id = sample["target"]
+            label_mask = sample["is_mask"]
+            input, input_masked, label_id, label_mask = input.to(device), input_masked.to(device), label_id.to(device), label_mask.to(device)
             
-                total_loss += loss.item()
-                # 293 batches (batch_size = 256), print out loss every 70 batches
-                if (i + 1) % 70 == 0:
-                    t_loader.set_postfix("Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
-                    logging.info("- Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
+            optimizer.zero_grad()
+            # unmasked: L_arc + lambda * L_ce
+            output, embed1, embed2, mask = net(input, label_id)
+            loss = criterion(output, label_id) + 0.1 * criterion(mask * 0, label_mask)
+            # masked: L_arc + lambda * L_ce
+            output_m, embed1_m, embed2_m, mask_m = net(input_masked, label_id)
+            loss += criterion(output_m, label_id) + 0.1 * criterion(mask_m, label_mask)
+            loss /= 2
+            loss *= MSE(embed1, embed1_m) / 3
+            loss.backward()
+            optimizer.step()
+        
+            total_loss += loss.item()
+            t_loader.set_description("- Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
+            # 74907 images, 1085 batches (batch_size = 64), print out loss every 100 batches
+            if (i + 1) % 100 == 0:
+            # t_loader.set_postfix_str("Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
+              logging.info("\n- Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
         
         # average loss for whole training data: sum(loss per batch) / # of batch
         logging.info("- Training loss: {:.5f}".format(total_loss / total_step))
@@ -131,7 +134,7 @@ if __name__ == '__main__':
     utils.set_logger(os.path.join(args.model_dir, "train.log"))
 
     # get dataloaders
-    batch_size = 256
+    batch_size = 64
     workers = 2
     logging.info("Loading the datasets ...")
     train_loader, val_loader = dataloader.create_dataloader(args.data_dir, batch_size, workers)
@@ -144,6 +147,6 @@ if __name__ == '__main__':
 
     n_epochs = 100
     lr = 0.01
-    logging.info("Starting training for {} epoch(s) ...".format(n_epochs))
+    logging.info("Start training for {} epoch(s) ...".format(n_epochs))
     train(net, train_loader, val_loader, n_epochs, lr, args.model_dir, args.pretrained)
 
