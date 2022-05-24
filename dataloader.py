@@ -9,6 +9,8 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as TF
 import os
+from os.path import exists
+from random import random
 
 def create_dataloader(data_path, batch_size, workers):
     """ The folder is organized as follows: a trainset called `train`, a validation set called `val`
@@ -37,11 +39,11 @@ class PairDataset(ImageFolder):
 
     def __init__(self, root, transform=None, loader=datasets.folder.default_loader, is_valid_file=None):
         super(PairDataset, self).__init__(root, transform=transform, is_valid_file=is_valid_file)
-        self.imgs = self.samples
+        self.imgs = self.samples # contains both masked and unmasked samples
         self.transform = transform
 
     def __len__(self):
-        return len(self.imgs)//2
+        return len(self.imgs)//2 # divided by 2
 
     def __getitem__(self, index):
         """
@@ -50,14 +52,18 @@ class PairDataset(ImageFolder):
         Returns:
             tuple: (sample, target) where target is class_index of the target class.
         """
-        path, target = self.samples[index]
+        path, target = self.samples[index] # either a masked image or unmasked
         original_path = path
-        try: 
-            masked_sample, unmasked_sample = self.transform(self.loader(path)), self.transform(self.loader(path.replace('.jpg', '_N95.jpg')))
+        if path.endswith("_N95.jpg") and exists(path.replace("_N95.jpg", ".jpg")):
+            masked_sample, unmasked_sample = self.transform(self.loader(path)), self.transform(self.loader(path.replace('_N95.jpg', '.jpg')))
             sample = {'masked': masked_sample, 'unmasked': unmasked_sample, 'target' : target, 'is_mask' : 1}
-        except:
-            masked_sample, unmasked_sample = self.transform(self.loader(path.replace('_N95.jpg', '.jpg'))), self.transform(self.loader(path))
+        elif path.endswith(".jpg") and exists(path.replace(".jpg", "_N95.jpg")):
+            masked_sample, unmasked_sample = self.transform(self.loader(path.replace('.jpg', '_N95.jpg'))), self.transform(self.loader(path))
             sample = {'masked': masked_sample, 'unmasked': unmasked_sample, 'target' : target, 'is_mask' : 1}
+        else:
+            # make random idx
+            random_idx = int(random() * self.__len__())
+            sample = self.__getitem__(random_idx) 
         return sample
 
      #   if self.transform is not None:
