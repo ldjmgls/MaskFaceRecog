@@ -32,7 +32,7 @@ def create_dataloader(data_path, batch_size, workers):
     ])
 
     train_loader = loader(PairDataset(train_path, img_transform))
-    val_loader = loader(PairDataset(val_path, img_transform))
+    val_loader = loader(ValDataset(val_path, img_transform))
 
     return train_loader, val_loader
 
