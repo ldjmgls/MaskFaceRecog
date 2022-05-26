@@ -189,10 +189,19 @@ def iresnet34(pretrained = False, progress = True, **kwargs):
     return _iresnet("iresnet34", IBasicBlock, [3, 4, 6, 3], pretrained,
                     progress, **kwargs)
 
-def iresnet50(pretrained = False, progress = True, **kwargs):
-    return _iresnet("iresnet50", IBasicBlock, [3, 4, 6, 3], pretrained,
+# pretrained models in model_paths
+# def iresnet50(pretrained = False, progress = True, **kwargs):
+#     return _iresnet("iresnet50", IBasicBlock, [3, 4, 6, 3], pretrained,
+#                     progress, **kwargs)
+
+# def iresnet101(pretrained = False, progress = True, **kwargs):
+#     return _iresnet("iresnet101", IBasicBlock, [3, 4, 23, 3], pretrained,
+#                     progress, **kwargs)
+
+def iresnet50(pretrained=False, progress=True, **kwargs):
+    return _iresnet('iresnet50', IBasicBlock, [3, 4, 14, 3], pretrained,
                     progress, **kwargs)
 
-def iresnet101(pretrained = False, progress = True, **kwargs):
-    return _iresnet("iresnet101", IBasicBlock, [3, 4, 23, 3], pretrained,
+def iresnet100(pretrained=False, progress=True, **kwargs):
+    return _iresnet('iresnet100', IBasicBlock, [3, 13, 30, 3], pretrained,
                     progress, **kwargs)
