@@ -79,8 +79,8 @@ def plot_trend(mode, value, ylabel, model_dir):
     Args:
         mode: (string) train, val, or test
         trend: (list) list containing the values
-        name: (string) what to plot, e.g., loss, accuracy
-        save_path: (string) folder where the figure is to be saved
+        ylabel: (string) what to plot, e.g., loss, accuracy
+        model_dir: (string) folder where the figure is to be saved
     """
     plt.plot(value)
     plt.xlabel("Epoch")
