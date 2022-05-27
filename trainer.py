@@ -50,6 +50,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
     rate_decrease = 1
     patience = 1
     total_step = len(train_loader)
+    avg_loss_lst = []
 
     for epoch in range(n_epochs):
         logging.info("Epoch [{}/{}]".format(epoch + 1, n_epochs))
@@ -80,14 +81,15 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
             optimizer.step()
         
             total_loss += loss.item()
-            t_loader.set_description("- Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
+            t_loader.set_description("- Step [{}/{}], Loss: {:.7f}".format(i + 1, total_step, loss.item()))
             # 74907 images, 1085 batches (batch_size = 64), print out loss every 100 batches
             if (i + 1) % 100 == 0:
             # t_loader.set_postfix_str("Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
-              logging.info("\n- Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
+              logging.info("\n- Step [{}/{}], Loss: {:.7f}".format(i + 1, total_step, loss.item()))
         
         # average loss for whole training data: sum(loss per batch) / # of batch
-        logging.info("- Training loss: {:.5f}".format(total_loss / total_step))
+        avg_loss_lst.append(total_loss / total_step)
+        logging.info("- Training loss: {:.7f}".format(total_loss / total_step))
         
         # Run for 1 epoch on validation set
         # fmr100 = evaluate(net, val_loader, )
@@ -110,7 +112,8 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
         #         optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
         #         logging.info("- New Learning Rate")
         #     else: patience -= 1          
-
+    
+    utils.plot_trend("train", avg_loss_lst, "loss", args.model_dir)
     logging.info("Finish training!")
 
 
