@@ -151,6 +151,6 @@ if __name__ == '__main__':
 
     n_epochs = 50
     lr = 0.01
-    logging.info("Start training for {} epoch(s) ...".format(n_epochs))
+    logging.info("Start training for {} epoch(s) with lr = {} ...".format(n_epochs, lr))
     train(net, train_loader, val_loader, n_epochs, lr, batch_size, args.model_dir, args.pretrained)
 
