@@ -2,7 +2,7 @@ import logging
 import os
 import sys
 import shutil
-
+import matplotlib.pyplot as plt
 import torch
 
 def set_logger(log_path):
@@ -73,3 +73,18 @@ def load_checkpoint(checkpoint, model, optimizer = None):
     epochs = checkpoint['epoch']
 
     return checkpoint, epochs
+
+def plot_trend(mode, value, ylabel, model_dir):
+    """
+    Args:
+        mode: (string) train, val, or test
+        trend: (list) list containing the values
+        ylabel: (string) what to plot, e.g., loss, accuracy
+        model_dir: (string) folder where the figure is to be saved
+    """
+    plt.plot(value)
+    plt.xlabel("Epoch")
+    plt.ylabel(ylabel)
+    filepath = os.path.join(model_dir, mode + "_" + ylabel + ".png")
+    plt.savefig(filepath)
+
