@@ -81,7 +81,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
             optimizer.step()
         
             total_loss += loss.item()
-            t_loader.set_description("- Step [{}/{}], Loss: {:.7f}".format(i + 1, total_step, loss.item() * 100))
+            t_loader.set_description("- Step [{}/{}], Loss: {:.7f}".format(i + 1, total_step, loss.item()))
             # 74907 images, 1085 batches (batch_size = 64), print out loss every 100 batches
             if (i + 1) % 100 == 0:
             # t_loader.set_postfix_str("Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     net = model.FocusFace(identities = identities)
     net.to(device)
 
-    n_epochs = 100
+    n_epochs = 50
     lr = 0.01
     logging.info("Start training for {} epoch(s) ...".format(n_epochs))
     train(net, train_loader, val_loader, n_epochs, lr, batch_size, args.model_dir, args.pretrained)
