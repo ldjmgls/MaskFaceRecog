@@ -72,7 +72,7 @@ def load_checkpoint(checkpoint, model, optimizer = None):
         optimizer.load_state_dict(checkpoint['optim_dict'])
     epochs = checkpoint['epoch']
 
-    return checkpoint, epochs
+    return model, optimizer, epochs
 
 def plot_trend(mode, value, ylabel, model_dir):
     """
