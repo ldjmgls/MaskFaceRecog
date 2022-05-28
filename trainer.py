@@ -27,9 +27,9 @@ parser.add_argument("--model_dir", default = "result/base_model",
                     help = "Directory saving the model and log files")
 parser.add_argument("--pretrained", default = None,
                     help = "Optional, filename in --model_dir containing weights to reload before \
-                    training")  # 'best' or 'train'
+                    training")  # "best" or "last"
 
-def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = None):
+def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pretrained = None):
     """
     Args:
         pretrained: (string) optional- name of file to restore from (without its extension .pth.tar)
@@ -44,7 +44,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
         pretrain_path = os.path.join(
             model_dir, pretrained + ".pth.tar")
         logging.info("Loading parameters from {}".format(pretrain_path))
-        _, epochs_trained = utils.load_checkpoint(pretrain_path, net, optimizer)
+        net, optimizer, resume_epoch = utils.load_checkpoint(pretrain_path, net, optimizer)
 
     best_score = 100
     rate_decrease = 1
@@ -85,15 +85,16 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
             # 74907 images, 1085 batches (batch_size = 64), print out loss every 100 batches
             if (i + 1) % 100 == 0:
             # t_loader.set_postfix_str("Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
-              logging.info("\n- Step [{}/{}], Loss: {:.7f}".format(i + 1, total_step, loss.item()))
+              logging.info("\n- Step [{}/{}], Loss: {:.7f}".format(i + 1, total_step, loss.item() * 100))
         
         # average loss for whole training data: sum(loss per batch) / # of batch
-        avg_loss_lst.append(total_loss / total_step)
-        logging.info("- Training loss: {:.7f}".format(total_loss / total_step))
+        avg_loss_lst.append(total_loss / total_step * 100)
+        logging.info("- Training loss: {:.7f}".format(total_loss / total_step * 100))
         
         # Run for 1 epoch on validation set
-        # fmr100 = evaluate(net, val_loader, )
-        # is_best = fmr100 < best_score
+        # metrics = evaluate(net, val_loader, batch_size)
+        # logging.info("- Validation metrics: {}".format(metrics))
+        # is_best = metrics["FMR100"] < best_score
         is_best = False
         # Save weights
         utils.save_checkpoint({'epoch': epoch + 1, 
@@ -101,16 +102,16 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, pretrained = N
                             'optim_dict': optimizer.state_dict()}, 
                             is_best = is_best, 
                             checkpoint = model_dir)
-        # if fmr100 < best_score:
-        #     logging.info("- Found new best fmr100")
-        #     best_score = fmr100
+        # if FMR100 < best_score:
+        #     logging.info("- Found new best FMR100: {}".format(FMR100))
+        #     best_score = FMR100
         #     patience = 1
         # else:
         #     if patience == 0:
         #         patience = 1
         #         rate_decrease /= 10
         #         optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
-        #         logging.info("- New Learning Rate")
+        #         logging.info("- New Learning Rate: {}".format(lr * rate_decrease))
         #     else: patience -= 1          
     
     utils.plot_trend("train", avg_loss_lst, "loss", args.model_dir)
@@ -148,8 +149,8 @@ if __name__ == '__main__':
     net = model.FocusFace(identities = identities)
     net.to(device)
 
-    n_epochs = 100
+    n_epochs = 50
     lr = 0.01
-    logging.info("Start training for {} epoch(s) ...".format(n_epochs))
-    train(net, train_loader, val_loader, n_epochs, lr, args.model_dir, args.pretrained)
+    logging.info("Start training for {} epoch(s) with lr = {} ...".format(n_epochs, lr))
+    train(net, train_loader, val_loader, n_epochs, lr, batch_size, args.model_dir, args.pretrained)
 
