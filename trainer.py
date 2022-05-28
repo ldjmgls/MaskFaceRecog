@@ -44,7 +44,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
         pretrain_path = os.path.join(
             model_dir, pretrained + ".pth.tar")
         logging.info("Loading parameters from {}".format(pretrain_path))
-        net, optimizer, resume_epoch = utils.load_checkpoint(pretrain_path, net, optimizer)
+        utils.load_checkpoint(pretrain_path, net, optimizer)
 
     best_score = 100
     rate_decrease = 1
