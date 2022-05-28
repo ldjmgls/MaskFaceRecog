@@ -134,7 +134,7 @@ if __name__ == '__main__':
 =======
     pretrain_path = os.path.join( args.model_dir, args.pretrained + ".pth.tar")
     logging.info("Loading parameters from {}".format(pretrain_path))
-    net, optimizer, _ = utils.load_checkpoint(pretrain_path, net)
+    utils.load_checkpoint(pretrain_path, net)
 
     logging.info("Start evaluation ...")
     test_metrics = evaluate(net, test_loader, batch_size)
