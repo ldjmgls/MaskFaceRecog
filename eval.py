@@ -77,5 +77,5 @@ if __name__ == '__main__':
 
     logging.info("Start evaluation ...")
     test_metrics = evaluate(net, test_loader, batch_size)
-    save_path = os.path.join(args.model_dir, "metrics_test_{}.json".format(args.pretrained))
+    save_path = os.path.join(args.model_dir, "test_metrics_{}.json".format(args.pretrained))
     utils.save_dict_to_json(test_metrics, save_path)
