@@ -9,11 +9,12 @@ import torch.nn as nn
 
 __all__ = ["iresnet18", "iresnet34", "iresnet50", "iresnet101"]
 
+# don't use them for now
 model_paths = {
     "iresnet18": "", 
     "iresnet34": "", 
-    "iresnet50": "pretrained/iresnet50.pth", 
-    "iresnet101": "pretrained/iresnet101.pth"
+    "iresnet50": "pretrained/iresnet50.pth",            # [3, 4, 6, 3]
+    "iresnet101": "pretrained/iresnet101.pth"           # [3, 4, 23, 3]
 }
 
 def conv3x3(in_planes, out_planes, stride = 1, groups = 1, dilation = 1):
