@@ -94,6 +94,8 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
         # # Run for 1 epoch on validation set
         # metrics = evaluate(net, val_loader, batch_size)
         # logging.info("- Validation metrics: {}".format(metrics))
+        # last_json_path = os.path.join(model_dir, "val_metrics_last.json")
+        # utils.save_dict_to_json(metrics, last_json_path)
         # is_best = metrics["FMR100"] < best_score
         is_best = False
         # Save weights
@@ -107,6 +109,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
         #     best_score = metrics["FMR100"]
         #     patience = 1
         #     best_json_path = os.path.join(model_dir, "val_metrics_best.json")
+        #     logging.info("- Found best val metrics: {}".format(metrics))
         #     utils.save_dict_to_json(metrics, best_json_path)
         # else:
         #     if patience == 0:
@@ -115,9 +118,6 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
         #         optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
         #         logging.info("- New Learning Rate: {}".format(lr * rate_decrease))
         #     else: patience -= 1          
-        # # Save latest val metrics in a json file in the model directory
-        # last_json_path = os.path.join(model_dir, "val_metrics_last.json")
-        # utils.save_dict_to_json(metrics, last_json_path)
 
     utils.plot_trend("train", avg_loss_lst, "Loss", args.model_dir)
     logging.info("Finish training!")
