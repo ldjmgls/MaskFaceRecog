@@ -78,7 +78,6 @@ def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, bat
         gscores, iscores = [], []
 
         for i, (gen, imp) in enumerate(tqdm(data_loader), 0):
-            print('Evaluating on ', i)
             gen_target, gen_masked, gen_unmasked = gen['target'][0].to(device), gen['masked'].to(device), gen['unmasked'].to(device)
             imp_target, imp_masked, imp_unmasked = imp['target'][0].to(device), imp['masked'].to(device), imp['unmasked'].to(device)
 
@@ -126,5 +125,5 @@ if __name__ == '__main__':
 
     logging.info("Start evaluation ...")
     test_metrics = evaluate(net, test_loader, batch_size)
-    save_path = os.path.join(args.model_dir, "metrics_test_{}.json".format(args.pretrained))
+    save_path = os.path.join(args.model_dir, "test_metrics_{}.json".format(args.pretrained))
     utils.save_dict_to_json(test_metrics, save_path)
