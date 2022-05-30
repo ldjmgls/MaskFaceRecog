@@ -24,7 +24,7 @@ parser.add_argument("--model_dir", default = "result/base_model",
 parser.add_argument("--pretrained", default = "last",
                     help = "Optional, filename in --model_dir containing weights to load")  # 'best' or 'last'
 
-def generate_embeddings(net, data, batch_size):
+def generate_embeddings(net, target, data, batch_size, device):
     embeddings = None
     start = 0
 
@@ -33,10 +33,10 @@ def generate_embeddings(net, data, batch_size):
         count = end - start
         _data = data[end - batch_size: end]
         img = (((_data / 255) - 0.5) / 0.5).to(device)
-        y_pred = net(img, inference=True)[1]
+        y_pred = net(img, target)[1]
         _embeddings = y_pred.detach().cpu().numpy()
 
-        if _embeddings is None:
+        if embeddings is None:
             embeddings = np.zeros((data.shape[0], _embeddings.shape[1]))
 
         embeddings[start:end, :] = _embeddings[(batch_size - count):, :]
@@ -68,21 +68,25 @@ def embedding_dist(embed1: np.ndarray, embed2: np.ndarray) -> torch.Tensor:
     return 1 - torch.cdist(torch.from_numpy(embed1).reshape(1, -1), torch.from_numpy(embed2).reshape(1, -1)) / 2
 
 
-def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, batch_size: int):
+def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, batch_size: int, device):
     """
     TODO: Still intermediate code. Needs to be tested.
     """
-    net.eval()
+
     with torch.no_grad():
         gscores, iscores = [], []
 
         for i, (gen, imp) in enumerate(data_loader):
-            gen_emb1 = generate_embeddings(net, gen['masked'], batch_size)
-            gen_emb2 = generate_embeddings(net, gen['unmasked'], batch_size)
+            print('Evaluating on ', i)
+            gen_target, gen_masked, gen_unmasked = gen['target'][0].to(device), gen['masked'].to(device), gen['unmasked'].to(device)
+            imp_target, imp_masked, imp_unmasked = imp['target'][0].to(device), imp['masked'].to(device), imp['unmasked'].to(device)
+
+            gen_emb1 = generate_embeddings(net, gen_target, gen_masked, batch_size, device=device)
+            gen_emb2 = generate_embeddings(net, gen_target, gen_unmasked, batch_size, device=device)
             gen_emb1, gen_emb2 = normalize_embeddings(gen_emb1, gen_emb2)
 
-            imp_emb1 = generate_embeddings(net, imp['masked'], batch_size)
-            imp_emb2 = generate_embeddings(net, imp['unmasked'], batch_size)
+            imp_emb1 = generate_embeddings(net, imp_target, imp_masked, batch_size, device=device)
+            imp_emb2 = generate_embeddings(net, imp_target, imp_unmasked, batch_size, device=device)
             imp_emb1, imp_emb2 = normalize_embeddings(imp_emb1, imp_emb2)
 
             gscores.append(embedding_dist(gen_emb1, gen_emb2))

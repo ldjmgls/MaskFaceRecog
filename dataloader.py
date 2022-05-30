@@ -93,26 +93,39 @@ class ValDataset(ImageFolder):
         gen_path, gen_target = self.imgs[index]
 
         # idx for the imposter image
-        rand_idx = int(random() * self.__len__())   
-        if rand_idx == gen_target:  # Is target an int between 0 and self.len?
-            rand_idx = self.__len__() - 1 - gen_target  # make sure rand_idx != target
-        im_path, im_target = self.imgs[rand_idx]
-
+        im_unmasked_path = None
+        
+        while im_unmasked_path is None:
+            rand_idx = int(random() * self.__len__())   
+            if rand_idx == gen_target:  # Is target an int between 0 and self.len?
+                rand_idx = self.__len__() - 1 - gen_target  # make sure rand_idx != target
+            im_path, im_target = self.imgs[rand_idx]
+            im_unmasked_path = im_path.replace('.jpg', '_N95.jpg') if im_path.endswith('_N95.jpg') else im_path
+            im_unmasked_path = im_unmasked_path if exists(im_unmasked_path) else None
+        
         masked_path = gen_path if gen_path.endswith('_N95.jpg') else gen_path.replace('.jpg', '_N95.jpg')
-        gen_unmasked_path = gen_path.replace('.jpg', '_N95.jpg') if gen_path.endswith('_N95.jpg') else gen_path
-        im_unmasked_path = im_path.replace('.jpg', '_N95.jpg') if im_path.endswith('_N95.jpg') else im_path
+        gen_unmasked_path = gen_path.replace('_N95.jpg', '.jpg') if gen_path.endswith('_N95.jpg') else gen_path
+        
 
         # Loading data samples to genuine and imposter
-        if exists(masked_path) and exists(gen_unmasked_path) and exists(im_unmasked_path):
+        if exists(masked_path) and exists(gen_unmasked_path):
             masked_sample = self.transform(self.loader(masked_path))
             gen_unmasked_sample = self.transform(self.loader(gen_unmasked_path))
+            
+            genuine = {'masked': masked_sample, 'unmasked': gen_unmasked_sample, 'target': [gen_target, gen_target], 'is_same': 1}
+        else:   # If there is no two image of the same person (masked and unmasked)
+            print(masked_path, masked_path, gen_unmasked_path, exists(masked_path), exists(gen_unmasked_path))
+            genuine = self.__getitem__(int(random()) * self.__len__())[0]    # If no genuine, recursively find random indices until there is genuine data
+        
+        if exists(masked_path):
+            masked_sample = self.transform(self.loader(masked_path))
             im_unmasked_sample = self.transform(self.loader(im_unmasked_path))
 
-            genuine = {'masked': masked_sample, 'unmasked': gen_unmasked_sample, 'target': (gen_target, gen_target), 'is_same': 1}
-            imposter = {'masked': masked_sample, 'unmasked': im_unmasked_sample, 'target': (gen_target, im_target), 'is_same': 0}
-        else:   # If there is no two image of the same person (masked and unmasked)
-            genuine, imposter = self.__getitem__(int(random() * self.__len__()))    # If no genuine, recursively find random indices until there is genuine data
-        
+            imposter = {'masked': masked_sample, 'unmasked': im_unmasked_sample, 'target': [gen_target, im_target], 'is_same': 0}
+        else:
+            print(im_path, im_target, exists(im_unmasked_path))
+            imposter = self.__getitem__(int(random()) * self.__len__())[1]
+
         return genuine, imposter
 
 
