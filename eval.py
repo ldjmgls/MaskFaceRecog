@@ -4,14 +4,16 @@ Evaluate the model. (For validation and testing)
 import argparse
 import logging
 import os
+from typing import Tuple
 
 import numpy as np
 import torch
 from sklearn.preprocessing import normalize
+from tqdm import tqdm
 
-import utils
-import model
 import dataloader
+import model
+import utils
 from metrics import evaluate_metrics
 
 parser = argparse.ArgumentParser()
@@ -23,21 +25,7 @@ parser.add_argument("--model_dir", default = "result/base_model",
 parser.add_argument("--pretrained", default = "last",
                     help = "Optional, filename in --model_dir containing weights to load")  # 'best' or 'last'
 
-def generate_gscore():
-    """
-    TODO: Genuine match scores are obtained by matching feature sets of the same class (same person)
-    """
-    pass
-
-
-def generate_iscore():
-    """
-    TODO: Impostor matching scores are obtained by matching feature sets of different classes (different persons)
-    """
-    pass
-
-
-def generate_embeddings(net, data, batch_size):
+def generate_embeddings(net, target, data, batch_size, device):
     embeddings = None
     start = 0
 
@@ -46,60 +34,66 @@ def generate_embeddings(net, data, batch_size):
         count = end - start
         _data = data[end - batch_size: end]
         img = (((_data / 255) - 0.5) / 0.5).to(device)
-        y_pred = net(img, inference=True)[1]
+        y_pred = net(img, target)[1]
         _embeddings = y_pred.detach().cpu().numpy()
 
-        if _embeddings is None:
+        if embeddings is None:
             embeddings = np.zeros((data.shape[0], _embeddings.shape[1]))
 
         embeddings[start:end, :] = _embeddings[(batch_size - count):, :]
         start = end
-    
+
     return embeddings
 
 
+def normalize_embeddings(embed1: np.ndarray, embed2: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Normalize the two embeddings
+    :param embed1: the first embedding
+    :param embed2: the second embedding
+    :return normalized embed1 and embed2
+    """
+    embed1 = normalize(embed1)
+    embeds = normalize(embed1 + embed2)
+    
+    return embeds[0::2], embeds[1::2]
 
-def evaluate(net, data_loader, batch_size, data_set):
+
+def embedding_dist(embed1: np.ndarray, embed2: np.ndarray) -> torch.Tensor:
     """
-    TODO: This code is retrieved from the original FocusFace Repo. Still needs to be refined and adjusted for our own dataset/dataloader.
+    Calculates the distance between the two embeddings.
+    :param embed1: the first embedding
+    :param embed2: the second embedding
+    :return distance between embed1 and embed2
     """
-    net.eval()
+    return 1 - torch.cdist(torch.from_numpy(embed1).reshape(1, -1), torch.from_numpy(embed2).reshape(1, -1)) / 2
+
+
+def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, batch_size: int, device):
+    """
+    TODO: Still intermediate code. Needs to be tested.
+    """
+
     with torch.no_grad():
         gscores, iscores = [], []
-        data_list, issame_list = data_set[0], data_set[1]
-        embeddings_list = []
 
-        for i, batch in enumerate(data_loader):
-            pass
-        
-        # Generating embeddings
-        for i, data in enumerate(data_list):
-            embeddings = generate_embeddings(net, data, batch_size)
+        for i, (gen, imp) in enumerate(tqdm(data_loader), 0):
+            print('Evaluating on ', i)
+            gen_target, gen_masked, gen_unmasked = gen['target'][0].to(device), gen['masked'].to(device), gen['unmasked'].to(device)
+            imp_target, imp_masked, imp_unmasked = imp['target'][0].to(device), imp['masked'].to(device), imp['unmasked'].to(device)
 
-            # Normalize
-            embeddings_list.append(embeddings)
+            gen_emb1 = generate_embeddings(net, gen_target, gen_masked, batch_size, device=device)
+            gen_emb2 = generate_embeddings(net, gen_target, gen_unmasked, batch_size, device=device)
+            gen_emb1, gen_emb2 = normalize_embeddings(gen_emb1, gen_emb2)
 
-        embeddings = embeddings_list[0].copy()
-        embeddings = normalize(embeddings)
+            imp_emb1 = generate_embeddings(net, imp_target, imp_masked, batch_size, device=device)
+            imp_emb2 = generate_embeddings(net, imp_target, imp_unmasked, batch_size, device=device)
+            imp_emb1, imp_emb2 = normalize_embeddings(imp_emb1, imp_emb2)
 
-        embeddings = embeddings_list[0] + embeddings_list[1]
-        embeddings = normalize(embeddings)
+            gscores.append(embedding_dist(gen_emb1, gen_emb2))
+            iscores.append(embedding_dist(imp_emb1, imp_emb2))
 
-        embeddings1 = embeddings[0::2]
-        embeddings2 = embeddings[1::2]
-        
-
-        # Adding to gscores and iscores
-        for embedding1, embedding2, label in zip(embeddings1, embeddings2, issame_list):
-            dist = 1 - torch.cdist(torch.from_numpy(embedding1).view(1, -1),
-                                   torch.from_numpy(embedding2).view(1, -1))/2
-            if label == 1:
-                gscores.append(dist)
-            else:
-                iscores.append(dist)
-
-    evaluate_metrics(gscores, iscores, clf_name='A', print_results=True)
-    # logging.info("- Validation metrics: {}".format(result))
+    return evaluate_metrics(gscores, iscores, clf_name='A', print_results=True)
 
 
 if __name__ == '__main__':
@@ -125,13 +119,7 @@ if __name__ == '__main__':
     identities = 1506   
     net = model.FocusFace(identities).to(device)
     # Load weights from the saved file
-<<<<<<< HEAD
-    if args.pretrained is not None:
-        pretrain_path = os.path.join(
-            args.model_dir, args.pretrained + ".pth.tar")
-        logging.info("Loading parameters from {}".format(pretrain_path))
-        utils.load_checkpoint(pretrain_path, net)
-=======
+
     pretrain_path = os.path.join( args.model_dir, args.pretrained + ".pth.tar")
     logging.info("Loading parameters from {}".format(pretrain_path))
     utils.load_checkpoint(pretrain_path, net)
@@ -140,4 +128,3 @@ if __name__ == '__main__':
     test_metrics = evaluate(net, test_loader, batch_size)
     save_path = os.path.join(args.model_dir, "metrics_test_{}.json".format(args.pretrained))
     utils.save_dict_to_json(test_metrics, save_path)
->>>>>>> 5197bf20c123d22e3eca1408fdf33b7881a2ed2a
