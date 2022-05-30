@@ -9,6 +9,7 @@ from typing import Tuple
 import numpy as np
 import torch
 from sklearn.preprocessing import normalize
+from tqdm import tqdm
 
 import dataloader
 import model
@@ -76,7 +77,7 @@ def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, bat
     with torch.no_grad():
         gscores, iscores = [], []
 
-        for i, (gen, imp) in enumerate(data_loader):
+        for i, (gen, imp) in enumerate(tqdm(data_loader), 0):
             print('Evaluating on ', i)
             gen_target, gen_masked, gen_unmasked = gen['target'][0].to(device), gen['masked'].to(device), gen['unmasked'].to(device)
             imp_target, imp_masked, imp_unmasked = imp['target'][0].to(device), imp['masked'].to(device), imp['unmasked'].to(device)
