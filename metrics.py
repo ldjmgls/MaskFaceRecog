@@ -8,33 +8,34 @@ import numpy as np
 import os
 
 
-def evaluate_metrics(gscores: list, iscores: list, clf_name: str = 'A', print_results: bool = True) -> dict:
+def evaluate_metrics(model_dir, gscores: list, iscores: list, clf_name: str = 'A', print_results: bool = True) -> dict:
     """
     Evaluates the Equal Error Rate.
     :params gscores: the scores for genuine predictions
     :params iscores: the scores for imposter predictions
     :params clf_name: name of the classifier, used for generating report files
     """
-    if not os.path.exists('eval'):
-        os.mkdir('eval')
+    evalPath = os.path.join(model_dir, "eval")
+    if not os.path.exists(evalPath):
+        os.mkdir(evalPath)
 
     # Calculating stats for classifier
     stats = get_eer_stats(gscores, iscores)
 
     # Generating csv report
     generate_eer_report([stats], [clf_name],
-                        os.path.join('eval', 'pyeer_report.csv'))
+                        os.path.join(evalPath, 'pyeer_report.csv'))
 
     # Export DET curve
     export_error_rates(stats.fmr, stats.fnmr, os.path.join(
-        'eval', f'{clf_name}_DET.csv'))
+        evalPath, f'{clf_name}_DET.csv'))
 
     # # Export ROC curve
     export_error_rates(stats.fmr, 1 - stats.fnmr,
-                       os.path.join('eval', f'{clf_name}_ROC.csv'))
+                       os.path.join(evalPath, f'{clf_name}_ROC.csv'))
 
     # Plotting
-    plot_eer_stats([stats], [clf_name], save_path='eval')
+    plot_eer_stats([stats], [clf_name], save_path = evalPath)
 
     result = {
         "EER": stats.eer,

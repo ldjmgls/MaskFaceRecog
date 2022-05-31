@@ -92,7 +92,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
         logging.info("- Training loss: {:.9f}".format(total_loss / total_step * 10000))
         
         # Run for 1 epoch on validation set
-        metrics = evaluate(net, val_loader, batch_size)
+        metrics = evaluate(net, val_loader, batch_size, device, model_dir)
         logging.info("- Validation metrics: {}".format(metrics))
         last_json_path = os.path.join(model_dir, "val_metrics_last.json")
         utils.save_dict_to_json(metrics, last_json_path)
