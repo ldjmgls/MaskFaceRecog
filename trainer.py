@@ -85,11 +85,11 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
             # 74907 images, 1085 batches (batch_size = 64), print out loss every 100 batches
             if (i + 1) % 100 == 0:
             # t_loader.set_postfix_str("Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
-              logging.info("\n- Step [{}/{}], Loss: {:.9f}".format(i + 1, total_step, loss.item() * 10000))
+              logging.info("\n- Step [{}/{}], Loss: {:.9f}".format(i + 1, total_step, loss.item()))
         
         # average loss for whole training data: sum(loss per batch) / # of batch
         avg_loss_lst.append(total_loss / total_step * 100)
-        logging.info("- Training loss: {:.9f}".format(total_loss / total_step * 10000))
+        logging.info("- Training loss: {:.9f}".format(total_loss / total_step))
         
         # Run for 1 epoch on validation set
         metrics = evaluate(net, val_loader, batch_size, device, model_dir)
