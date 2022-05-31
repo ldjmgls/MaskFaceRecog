@@ -76,7 +76,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
             output_m, embed1_m, embed2_m, mask_m = net(input_masked, label_id)
             loss += criterion(output_m, label_id) + 0.1 * criterion(mask_m, label_mask)
             loss /= 2
-            loss *= MSE(embed1, embed1_m) / 3
+            loss += MSE(embed1, embed1_m) / 3
             loss.backward()
             optimizer.step()
         
