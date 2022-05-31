@@ -83,7 +83,7 @@ class ValDataset(ImageFolder):
         self.loader = loader
 
     def __len__(self):
-        return len(self.imgs) // 2
+        return len(self.imgs) // 8
 
     def __getitem__(self, index):
         """
