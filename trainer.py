@@ -81,43 +81,43 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
             optimizer.step()
         
             total_loss += loss.item()
-            t_loader.set_description("- Step [{}/{}], Loss: {:.7f}".format(i + 1, total_step, loss.item()))
+            t_loader.set_description("- Step [{}/{}], Loss: {:.9f}".format(i + 1, total_step, loss.item()))
             # 74907 images, 1085 batches (batch_size = 64), print out loss every 100 batches
             if (i + 1) % 100 == 0:
             # t_loader.set_postfix_str("Step [{}/{}], Loss: {:.5f}".format(i + 1, total_step, loss.item()))
-              logging.info("\n- Step [{}/{}], Loss: {:.7f}".format(i + 1, total_step, loss.item() * 100))
+              logging.info("\n- Step [{}/{}], Loss: {:.9f}".format(i + 1, total_step, loss.item() * 10000))
         
         # average loss for whole training data: sum(loss per batch) / # of batch
         avg_loss_lst.append(total_loss / total_step * 100)
-        logging.info("- Training loss: {:.7f}".format(total_loss / total_step * 100))
+        logging.info("- Training loss: {:.9f}".format(total_loss / total_step * 10000))
         
-        # # Run for 1 epoch on validation set
-        # metrics = evaluate(net, val_loader, batch_size)
-        # logging.info("- Validation metrics: {}".format(metrics))
-        # last_json_path = os.path.join(model_dir, "val_metrics_last.json")
-        # utils.save_dict_to_json(metrics, last_json_path)
-        # is_best = metrics["FMR100"] < best_score
-        is_best = False
+        # Run for 1 epoch on validation set
+        metrics = evaluate(net, val_loader, batch_size)
+        logging.info("- Validation metrics: {}".format(metrics))
+        last_json_path = os.path.join(model_dir, "val_metrics_last.json")
+        utils.save_dict_to_json(metrics, last_json_path)
+        is_best = metrics["FMR100"] < best_score
+        # is_best = False
         # Save weights
         utils.save_checkpoint({'epoch': epoch + 1, 
                             'state_dict': net.state_dict(),
                             'optim_dict': optimizer.state_dict()}, 
                             is_best = is_best, 
                             checkpoint = model_dir)
-        # if metrics["FMR100"] < best_score:
-        #     logging.info("- Found new best FMR100: {}".format(metrics["FMR100"]))
-        #     best_score = metrics["FMR100"]
-        #     patience = 1
-        #     best_json_path = os.path.join(model_dir, "val_metrics_best.json")
-        #     logging.info("- Found best val metrics: {}".format(metrics))
-        #     utils.save_dict_to_json(metrics, best_json_path)
-        # else:
-        #     if patience == 0:
-        #         patience = 1
-        #         rate_decrease /= 10
-        #         optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
-        #         logging.info("- New Learning Rate: {}".format(lr * rate_decrease))
-        #     else: patience -= 1          
+        if metrics["FMR100"] < best_score:
+            logging.info("- Found new best FMR100: {}".format(metrics["FMR100"]))
+            best_score = metrics["FMR100"]
+            patience = 1
+            best_json_path = os.path.join(model_dir, "val_metrics_best.json")
+            logging.info("- Found best val metrics: {}".format(metrics))
+            utils.save_dict_to_json(metrics, best_json_path)
+        else:
+            if patience == 0:
+                patience = 1
+                rate_decrease /= 10
+                optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
+                logging.info("- New Learning Rate: {}".format(lr * rate_decrease))
+            else: patience -= 1          
 
     utils.plot_trend("train", avg_loss_lst, "Loss", args.model_dir)
     logging.info("Finish training!")
@@ -154,8 +154,8 @@ if __name__ == '__main__':
     net = model.FocusFace(identities = identities)
     net.to(device)
 
-    n_epochs = 50
-    lr = 0.01
+    n_epochs = 100
+    lr = 0.1
     logging.info("Start training for {} epoch(s) with lr = {} ...".format(n_epochs, lr))
     train(net, train_loader, val_loader, n_epochs, lr, batch_size, args.model_dir, args.pretrained)
 
