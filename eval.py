@@ -25,26 +25,32 @@ parser.add_argument("--model_dir", default = "result/base_model",
 parser.add_argument("--pretrained", default = "last",
                     help = "Optional, filename in --model_dir containing weights to load")  # 'best' or 'last'
 
-def generate_embeddings(net, target, data, batch_size, device):
-    embeddings = None
-    start = 0
-    num_samples = data.shape[0]
+def generate_embeddings(net, target, data):
+    # embeddings = None
+    # start = 0
+    # num_samples = data.shape[0]
 
-    while start < num_samples:
-        end = min(start + batch_size, num_samples)
-        _data = data[end - num_samples: end]
-        img = (((_data / 255) - 0.5) / 0.5).to(device)
+    img = (((data / 255) - 0.5) / 0.5)
+    y_pred = net(img, target)[1].detach().cpu().numpy()
 
-        y_pred = net(img, target)[1]
-        _embeddings = y_pred.detach().cpu().numpy()
+    return y_pred
 
-        if embeddings is None:
-            embeddings = np.zeros((num_samples, _embeddings.shape[1]))
 
-        embeddings[start:end, :] = _embeddings
-        start = end
+    # while start < num_samples:
+    #     end = min(start + batch_size, num_samples)
+    #     _data = data[end - num_samples: end]
+    #     img = (((_data / 255) - 0.5) / 0.5).to(device)
 
-    return embeddings
+    #     y_pred = net(img, target)[1]
+    #     _embeddings = y_pred.detach().cpu().numpy()
+
+    #     if embeddings is None:
+    #         embeddings = np.zeros((num_samples, _embeddings.shape[1]))
+
+    #     embeddings[start:end, :] = _embeddings
+    #     start = end
+
+    # return embeddings
 
 
 def normalize_embeddings(embed1: np.ndarray, embed2: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
@@ -54,7 +60,9 @@ def normalize_embeddings(embed1: np.ndarray, embed2: np.ndarray) -> Tuple[np.nda
     :param embed2: the second embedding
     :return normalized embed1 and embed2
     """
+    
     embed1 = normalize(embed1)
+    embed2 = normalize(embed2)
     embeds = normalize(embed1 + embed2)
     
     return embeds[0::2], embeds[1::2]
@@ -82,12 +90,12 @@ def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, bat
             gen_target, gen_masked, gen_unmasked = gen['target'][0].to(device), gen['masked'].to(device), gen['unmasked'].to(device)
             imp_target, imp_masked, imp_unmasked = imp['target'][1].to(device), imp['masked'].to(device), imp['unmasked'].to(device)
 
-            gen_emb1 = generate_embeddings(net, gen_target, gen_masked, batch_size, device=device)
-            gen_emb2 = generate_embeddings(net, gen_target, gen_unmasked, batch_size, device=device)
+            gen_emb1 = generate_embeddings(net, gen_target, gen_masked)
+            gen_emb2 = generate_embeddings(net, gen_target, gen_unmasked)
             gen_emb1, gen_emb2 = normalize_embeddings(gen_emb1, gen_emb2)
 
-            imp_emb1 = generate_embeddings(net, imp_target, imp_masked, batch_size, device=device)
-            imp_emb2 = generate_embeddings(net, imp_target, imp_unmasked, batch_size, device=device)
+            imp_emb1 = generate_embeddings(net, imp_target, imp_masked)
+            imp_emb2 = generate_embeddings(net, imp_target, imp_unmasked)
             imp_emb1, imp_emb2 = normalize_embeddings(imp_emb1, imp_emb2)
 
             g_dist = embedding_dist(gen_emb1, gen_emb2).numpy()[0][0]
@@ -96,6 +104,8 @@ def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, bat
             gscores.append(g_dist)
             iscores.append(i_dist)
 
+    print(gscores)
+    print(iscores)
     return evaluate_metrics(gscores, iscores, clf_name='A', print_results=True)
 
 
