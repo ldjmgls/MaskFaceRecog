@@ -1,3 +1,4 @@
+import json
 import logging
 import os
 import sys
@@ -31,6 +32,17 @@ def set_logger(log_path):
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setFormatter(logging.Formatter("%(message)s"))
         logger.addHandler(stream_handler)
+
+def save_dict_to_json(d, json_path):
+    """Saves dict of floats in json file
+    Args:
+        d: (dict) of float-castable values (np.float, int, float, etc.)
+        json_path: (string) path to json file
+    """
+    with open(json_path, 'w') as f:
+        # We need to convert the values to float for json (it doesn't accept np.array, np.float, )
+        d = {k: float(v) for k, v in d.items()}
+        json.dump(d, f, indent=4)
 
 def save_checkpoint(state, is_best, checkpoint):
     """
@@ -67,10 +79,10 @@ def load_checkpoint(checkpoint, model, optimizer = None):
     if not os.path.exists(checkpoint):
         raise("File doesn't exist {}".format(checkpoint))
     checkpoint = torch.load(checkpoint)
-    model.load_state_dict(checkpoint['state_dict'])
+    model.load_state_dict(checkpoint["state_dict"])
     if optimizer:
-        optimizer.load_state_dict(checkpoint['optim_dict'])
-    epochs = checkpoint['epoch']
+        optimizer.load_state_dict(checkpoint["optim_dict"])
+    # epochs = checkpoint['epoch']
 
     return checkpoint
 

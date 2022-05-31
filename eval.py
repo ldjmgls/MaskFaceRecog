@@ -78,7 +78,7 @@ def embedding_dist(embed1: np.ndarray, embed2: np.ndarray) -> torch.Tensor:
     return 1 - torch.cdist(torch.from_numpy(embed1).reshape(1, -1), torch.from_numpy(embed2).reshape(1, -1)) / 2
 
 
-def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, batch_size: int, device):
+def evaluate(model_dir: str, net: model.FocusFace, data_loader: torch.utils.data.DataLoader, device):
     """
     TODO: Still intermediate code. Needs to be tested.
     """
@@ -106,7 +106,8 @@ def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, bat
 
     print(gscores)
     print(iscores)
-    return evaluate_metrics(gscores, iscores, clf_name='A', print_results=True)
+    return evaluate_metrics(model_dir, gscores, iscores, clf_name='A', print_results=True)
+
 
 
 if __name__ == '__main__':
