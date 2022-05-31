@@ -25,11 +25,13 @@ parser.add_argument("--data_dir", default = "data",
                     help = "Directory containing the dataset")
 parser.add_argument("--model_dir", default = "result/base_model",
                     help = "Directory saving the model and log files")
+parser.add_argument("--resume", default = False,
+                    help = "whether to resume training") 
 parser.add_argument("--pretrained", default = None,
                     help = "Optional, filename in --model_dir containing weights to reload before \
                     training")  # "best" or "last"
 
-def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pretrained = None):
+def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, resume = False, pretrained = None):
     """
     Args:
         pretrained: (string) optional- name of file to restore from (without its extension .pth.tar)
@@ -44,15 +46,21 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
         pretrain_path = os.path.join(
             model_dir, pretrained + ".pth.tar")
         logging.info("Loading parameters from {}".format(pretrain_path))
-        utils.load_checkpoint(pretrain_path, net, optimizer)
-
-    best_score = 100
+        checkpoint = utils.load_checkpoint(pretrain_path, net, optimizer)
+    
+    if resume: 
+        start_epoch = checkpoint["epoch"]
+        best_score = checkpoint["best_score"]
+        avg_loss_lst = checkpoint["avg_loss"]
+    else: 
+        start_epoch = 0
+        best_score = 100
+        avg_loss_lst = []
     rate_decrease = 1
     patience = 1
     total_step = len(train_loader)
-    avg_loss_lst = []
 
-    for epoch in range(n_epochs):
+    for epoch in range(start_epoch, n_epochs):
         logging.info("Epoch [{}/{}]".format(epoch + 1, n_epochs))
         net.train()
         total_loss = 0
@@ -88,7 +96,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
               logging.info("\n- Step [{}/{}], Loss: {:.9f}".format(i + 1, total_step, loss.item()))
         
         # average loss for whole training data: sum(loss per batch) / # of batch
-        avg_loss_lst.append(total_loss / total_step * 100)
+        avg_loss_lst.append(total_loss / total_step)
         logging.info("- Training loss: {:.9f}".format(total_loss / total_step))
         
         # Run for 1 epoch on validation set
@@ -96,14 +104,8 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
         logging.info("- Validation metrics: {}".format(metrics))
         last_json_path = os.path.join(model_dir, "val_metrics_last.json")
         utils.save_dict_to_json(metrics, last_json_path)
+        
         is_best = metrics["FMR100"] < best_score
-        # is_best = False
-        # Save weights
-        utils.save_checkpoint({'epoch': epoch + 1, 
-                            'state_dict': net.state_dict(),
-                            'optim_dict': optimizer.state_dict()}, 
-                            is_best = is_best, 
-                            checkpoint = model_dir)
         if metrics["FMR100"] < best_score:
             logging.info("- Found new best FMR100: {}".format(metrics["FMR100"]))
             best_score = metrics["FMR100"]
@@ -117,7 +119,15 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, pr
                 rate_decrease /= 10
                 optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
                 logging.info("- New Learning Rate: {}".format(lr * rate_decrease))
-            else: patience -= 1          
+            else: patience -= 1    
+       # Save weights
+        utils.save_checkpoint({"epoch": epoch + 1, 
+                            "state_dict": net.state_dict(),
+                            "optim_dict": optimizer.state_dict(),
+                            "avg_loss": avg_loss_lst,
+                            "best_score": best_score}, 
+                            is_best = is_best, 
+                            checkpoint = model_dir)      
 
     utils.plot_trend("train", avg_loss_lst, "Loss", args.model_dir)
     logging.info("Finish training!")
@@ -157,5 +167,5 @@ if __name__ == '__main__':
     n_epochs = 100
     lr = 0.1
     logging.info("Start training for {} epoch(s) with lr = {} ...".format(n_epochs, lr))
-    train(net, train_loader, val_loader, n_epochs, lr, batch_size, args.model_dir, args.pretrained)
+    train(net, train_loader, val_loader, n_epochs, lr, batch_size, args.model_dir, args.resume, args.pretrained)
 
