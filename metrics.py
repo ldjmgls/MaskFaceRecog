@@ -8,7 +8,7 @@ import numpy as np
 import os
 
 
-def evaluate_metrics(gscores, iscores, clf_name='A', print_results=True):
+def evaluate_metrics(gscores: list, iscores: list, clf_name: str = 'A', print_results: bool = True) -> dict:
     """
     Evaluates the Equal Error Rate.
     :params gscores: the scores for genuine predictions
@@ -22,13 +22,16 @@ def evaluate_metrics(gscores, iscores, clf_name='A', print_results=True):
     stats = get_eer_stats(gscores, iscores)
 
     # Generating csv report
-    generate_eer_report([stats], [clf_name], os.path.join('eval', 'pyeer_report.csv'))
+    generate_eer_report([stats], [clf_name],
+                        os.path.join('eval', 'pyeer_report.csv'))
 
     # Export DET curve
-    export_error_rates(stats.fmr, stats.fnmr, os.path.join('eval', f'{clf_name}_DET.csv'))
+    export_error_rates(stats.fmr, stats.fnmr, os.path.join(
+        'eval', f'{clf_name}_DET.csv'))
 
     # # Export ROC curve
-    export_error_rates(stats.fmr, 1 - stats.fnmr, os.path.join('eval', f'{clf_name}_ROC.csv'))
+    export_error_rates(stats.fmr, 1 - stats.fnmr,
+                       os.path.join('eval', f'{clf_name}_ROC.csv'))
 
     # Plotting
     plot_eer_stats([stats], [clf_name], save_path='eval')
