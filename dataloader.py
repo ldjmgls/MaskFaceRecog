@@ -83,7 +83,7 @@ class ValDataset(ImageFolder):
         self.loader = loader
 
     def __len__(self):
-        return len(self.imgs)
+        return len(self.imgs) // 2
 
     def __getitem__(self, index):
         """
@@ -112,7 +112,7 @@ class ValDataset(ImageFolder):
             masked_sample = self.transform(self.loader(masked_path))
             gen_unmasked_sample = self.transform(self.loader(gen_unmasked_path))
             
-            genuine = {'masked': masked_sample, 'unmasked': gen_unmasked_sample, 'target': [gen_target, gen_target], 'is_same': 1}
+            genuine = {'masked': masked_sample, 'unmasked': gen_unmasked_sample, 'target': (gen_target, gen_target), 'is_same': 1}
         else:   # If there is no two image of the same person (masked and unmasked)
             print(masked_path, masked_path, gen_unmasked_path, exists(masked_path), exists(gen_unmasked_path))
             genuine = self.__getitem__(int(random()) * self.__len__())[0]    # If no genuine, recursively find random indices until there is genuine data
@@ -121,7 +121,7 @@ class ValDataset(ImageFolder):
             masked_sample = self.transform(self.loader(masked_path))
             im_unmasked_sample = self.transform(self.loader(im_unmasked_path))
 
-            imposter = {'masked': masked_sample, 'unmasked': im_unmasked_sample, 'target': [gen_target, im_target], 'is_same': 0}
+            imposter = {'masked': masked_sample, 'unmasked': im_unmasked_sample, 'target': (gen_target, im_target), 'is_same': 0}
         else:
             print(im_path, im_target, exists(im_unmasked_path))
             imposter = self.__getitem__(int(random()) * self.__len__())[1]

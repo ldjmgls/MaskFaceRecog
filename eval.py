@@ -28,19 +28,20 @@ parser.add_argument("--pretrained", default = "last",
 def generate_embeddings(net, target, data, batch_size, device):
     embeddings = None
     start = 0
+    num_samples = data.shape[0]
 
-    while start < data.shape[0]:
-        end = min(start + batch_size, data.shape[0])
-        count = end - start
-        _data = data[end - batch_size: end]
+    while start < num_samples:
+        end = min(start + batch_size, num_samples)
+        _data = data[end - num_samples: end]
         img = (((_data / 255) - 0.5) / 0.5).to(device)
+
         y_pred = net(img, target)[1]
         _embeddings = y_pred.detach().cpu().numpy()
 
         if embeddings is None:
-            embeddings = np.zeros((data.shape[0], _embeddings.shape[1]))
+            embeddings = np.zeros((num_samples, _embeddings.shape[1]))
 
-        embeddings[start:end, :] = _embeddings[(batch_size - count):, :]
+        embeddings[start:end, :] = _embeddings
         start = end
 
     return embeddings
@@ -78,9 +79,8 @@ def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, bat
         gscores, iscores = [], []
 
         for i, (gen, imp) in enumerate(tqdm(data_loader), 0):
-            print('Evaluating on ', i)
             gen_target, gen_masked, gen_unmasked = gen['target'][0].to(device), gen['masked'].to(device), gen['unmasked'].to(device)
-            imp_target, imp_masked, imp_unmasked = imp['target'][0].to(device), imp['masked'].to(device), imp['unmasked'].to(device)
+            imp_target, imp_masked, imp_unmasked = imp['target'][1].to(device), imp['masked'].to(device), imp['unmasked'].to(device)
 
             gen_emb1 = generate_embeddings(net, gen_target, gen_masked, batch_size, device=device)
             gen_emb2 = generate_embeddings(net, gen_target, gen_unmasked, batch_size, device=device)
@@ -90,8 +90,11 @@ def evaluate(net: model.FocusFace, data_loader: torch.utils.data.DataLoader, bat
             imp_emb2 = generate_embeddings(net, imp_target, imp_unmasked, batch_size, device=device)
             imp_emb1, imp_emb2 = normalize_embeddings(imp_emb1, imp_emb2)
 
-            gscores.append(embedding_dist(gen_emb1, gen_emb2))
-            iscores.append(embedding_dist(imp_emb1, imp_emb2))
+            g_dist = embedding_dist(gen_emb1, gen_emb2).numpy()[0][0]
+            i_dist = embedding_dist(imp_emb1, imp_emb2).numpy()[0][0]
+
+            gscores.append(g_dist)
+            iscores.append(i_dist)
 
     return evaluate_metrics(gscores, iscores, clf_name='A', print_results=True)
 
