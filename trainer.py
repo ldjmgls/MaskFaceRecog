@@ -31,7 +31,7 @@ parser.add_argument("--pretrained", default = None,
                     help = "Optional, filename in --model_dir containing weights to reload before \
                     training")  # "best" or "last"
 
-def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, resume = False, pretrained = None):
+def train(net, train_loader, val_loader, n_epochs, lr, model_dir, resume = False, pretrained = None):
     """
     Args:
         pretrained: (string) optional- name of file to restore from (without its extension .pth.tar)
@@ -101,7 +101,7 @@ def train(net, train_loader, val_loader, n_epochs, lr, batch_size, model_dir, re
         
         # Run for 1 epoch on validation set
         logging.info("- Start validation ...")
-        metrics = evaluate(net, val_loader, batch_size, device, model_dir)
+        metrics = evaluate(model_dir, net, val_loader, device)
         logging.info("- Validation metrics: {}".format(metrics))
         last_json_path = os.path.join(model_dir, "val_metrics_last.json")
         utils.save_dict_to_json(metrics, last_json_path)
@@ -168,5 +168,5 @@ if __name__ == '__main__':
     n_epochs = 100
     lr = 0.1
     logging.info("Start training for {} epoch(s) with lr = {} ...".format(n_epochs, lr))
-    train(net, train_loader, val_loader, n_epochs, lr, batch_size, args.model_dir, args.resume, args.pretrained)
+    train(net, train_loader, val_loader, n_epochs, lr, args.model_dir, args.resume, args.pretrained)
 
