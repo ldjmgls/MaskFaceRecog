@@ -10,7 +10,7 @@ import torch.nn.functional as F
 class FocusFace(nn.Module):
     def __init__(self, identities = 1000):
         super(FocusFace, self).__init__()
-        self.model = iresnet.iresnet50()
+        self.model = iresnet.iresnet100()
         self.model.fc = EmbeddingHead(512, 32)
         self.fc1 = ArcFace(512, identities, scale = 64, margin = 0.5)
         self.fc2 = nn.Linear(32, 2)
