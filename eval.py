@@ -82,7 +82,7 @@ def evaluate(model_dir: str, net: model.FocusFace, data_loader: torch.utils.data
             gen_target, gen_masked, gen_unmasked = gen['target'][0].to(device), gen['masked'].to(device), gen['unmasked'].to(device)
             imp_target, imp_masked, imp_unmasked = imp['target'][1].to(device), imp['masked'].to(device), imp['unmasked'].to(device)
 
-            print(f"[DEBUG] distance genuine between embeddings: {torch.cdist(torch.from_numpy(gen_masked).reshape(1, -1), torch.from_numpy(gen_unmasked).reshape(1, -1))}")
+            print(f"[DEBUG] distance genuine between embeddings: {torch.cdist(gen_masked.reshape(1, -1), gen_unmasked.reshape(1, -1))}")
             gen_emb1 = generate_embeddings(net, gen_target, gen_masked)
             gen_emb2 = generate_embeddings(net, gen_target, gen_unmasked)
             gen_emb1, gen_emb2 = normalize(gen_emb1), normalize(gen_emb2)
