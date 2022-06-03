@@ -117,6 +117,7 @@ class ValDataset(ImageFolder):
             print(masked_path, masked_path, gen_unmasked_path, exists(masked_path), exists(gen_unmasked_path))
             genuine = self.__getitem__(int(random()) * self.__len__())[0]    # If no genuine, recursively find random indices until there is genuine data
         
+        # Imposter
         if exists(masked_path):
             masked_sample = self.transform(self.loader(masked_path))
             im_unmasked_sample = self.transform(self.loader(im_unmasked_path))

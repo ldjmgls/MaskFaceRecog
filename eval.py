@@ -26,32 +26,10 @@ parser.add_argument("--pretrained", default = "last",
                     help = "Optional, filename in --model_dir containing weights to load")  # 'best' or 'last'
 
 def generate_embeddings(net, target, data):
-    # embeddings = None
-    # start = 0
-    # num_samples = data.shape[0]
-
     img = (((data / 255) - 0.5) / 0.5)
     y_pred = net(img, target, inference=True)[1]
-    # print(y_pred)
 
     return y_pred
-
-
-    # while start < num_samples:
-    #     end = min(start + batch_size, num_samples)
-    #     _data = data[end - num_samples: end]
-    #     img = (((_data / 255) - 0.5) / 0.5).to(device)
-
-    #     y_pred = net(img, target)[1]
-    #     _embeddings = y_pred.detach().cpu().numpy()
-
-    #     if embeddings is None:
-    #         embeddings = np.zeros((num_samples, _embeddings.shape[1]))
-
-    #     embeddings[start:end, :] = _embeddings
-    #     start = end
-
-    # return embeddings
 
 
 def embedding_dist(embed1: np.ndarray, embed2: np.ndarray) -> torch.Tensor:
