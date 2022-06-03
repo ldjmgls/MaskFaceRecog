@@ -130,15 +130,14 @@ if __name__ == '__main__':
     _, test_loader = dataloader.create_dataloader(args.data_dir, batch_size, workers)
     logging.info("- Done.")
 
-    identities = 1506   
+    identities = 601   
     net = model.FocusFace(identities).to(device)
     # Load weights from the saved file
-
     pretrain_path = os.path.join( args.model_dir, args.pretrained + ".pth.tar")
     logging.info("Loading parameters from {}".format(pretrain_path))
     utils.load_checkpoint(pretrain_path, net)
 
     logging.info("Start evaluation ...")
-    test_metrics = evaluate(net, test_loader, batch_size)
+    test_metrics = evaluate(args.model_dir, net, test_loader, device)
     save_path = os.path.join(args.model_dir, "test_metrics_{}.json".format(args.pretrained))
     utils.save_dict_to_json(test_metrics, save_path)

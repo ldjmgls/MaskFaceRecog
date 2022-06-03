@@ -162,7 +162,7 @@ if __name__ == '__main__':
     logging.info("- Done.")
 
     # no. of classes (people identities)
-    identities = 1506
+    identities = 601
     net = model.FocusFace(identities = identities)
     net.to(device)
 
