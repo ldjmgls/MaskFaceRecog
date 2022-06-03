@@ -8,7 +8,7 @@ from typing import Tuple
 
 import numpy as np
 import torch
-from sklearn.preprocessing import normalize
+from torch.nn.functional import normalize
 from tqdm import tqdm
 
 import dataloader
@@ -31,7 +31,7 @@ def generate_embeddings(net, target, data):
     # num_samples = data.shape[0]
 
     img = (((data / 255) - 0.5) / 0.5)
-    y_pred = net(img, target)[1].detach().cpu().numpy()
+    y_pred = net(img, target)[1]
 
     return y_pred
 
@@ -53,21 +53,6 @@ def generate_embeddings(net, target, data):
     # return embeddings
 
 
-def normalize_embeddings(embed1: np.ndarray, embed2: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
-    """
-    Normalize the two embeddings
-    :param embed1: the first embedding
-    :param embed2: the second embedding
-    :return normalized embed1 and embed2
-    """
-    
-    embed1 = normalize(embed1)
-    embed2 = normalize(embed2)
-    embeds = normalize(embed1 + embed2)
-    
-    return embeds[0::2], embeds[1::2]
-
-
 def embedding_dist(embed1: np.ndarray, embed2: np.ndarray) -> torch.Tensor:
     """
     Calculates the distance between the two embeddings.
@@ -75,7 +60,14 @@ def embedding_dist(embed1: np.ndarray, embed2: np.ndarray) -> torch.Tensor:
     :param embed2: the second embedding
     :return distance between embed1 and embed2
     """
-    return 1 - torch.cdist(torch.from_numpy(embed1).reshape(1, -1), torch.from_numpy(embed2).reshape(1, -1)) / 2
+    # return 1 - torch.cdist(torch.from_numpy(embed1).reshape(1, -1), torch.from_numpy(embed2).reshape(1, -1)) / 2
+    cos = torch.nn.CosineSimilarity()
+    embeds = []
+
+    for i in range(embed1.shape[0]):
+        embeds.append(cos(embed1.reshape(1, -1), embed2.reshape(1, -1)))
+      
+    return embeds
 
 
 def evaluate(model_dir: str, net: model.FocusFace, data_loader: torch.utils.data.DataLoader, device):
@@ -92,17 +84,17 @@ def evaluate(model_dir: str, net: model.FocusFace, data_loader: torch.utils.data
 
             gen_emb1 = generate_embeddings(net, gen_target, gen_masked)
             gen_emb2 = generate_embeddings(net, gen_target, gen_unmasked)
-            gen_emb1, gen_emb2 = normalize_embeddings(gen_emb1, gen_emb2)
+            gen_emb1, gen_emb2 = normalize(gen_emb1), normalize(gen_emb2)
 
             imp_emb1 = generate_embeddings(net, imp_target, imp_masked)
             imp_emb2 = generate_embeddings(net, imp_target, imp_unmasked)
-            imp_emb1, imp_emb2 = normalize_embeddings(imp_emb1, imp_emb2)
+            imp_emb1, imp_emb2 = normalize(imp_emb1), normalize(imp_emb2)
 
-            g_dist = embedding_dist(gen_emb1, gen_emb2).numpy()[0][0]
-            i_dist = embedding_dist(imp_emb1, imp_emb2).numpy()[0][0]
+            g_dist = embedding_dist(gen_emb1, gen_emb2)
+            i_dist = embedding_dist(imp_emb1, imp_emb2)
 
-            gscores.append(g_dist)
-            iscores.append(i_dist)
+            gscores.extend(g_dist)
+            iscores.extend(i_dist)
 
     print(gscores)
     print(iscores)
@@ -130,15 +122,14 @@ if __name__ == '__main__':
     _, test_loader = dataloader.create_dataloader(args.data_dir, batch_size, workers)
     logging.info("- Done.")
 
-    identities = 1506   
+    identities = 601   
     net = model.FocusFace(identities).to(device)
     # Load weights from the saved file
-
     pretrain_path = os.path.join( args.model_dir, args.pretrained + ".pth.tar")
     logging.info("Loading parameters from {}".format(pretrain_path))
     utils.load_checkpoint(pretrain_path, net)
 
     logging.info("Start evaluation ...")
-    test_metrics = evaluate(net, test_loader, batch_size)
+    test_metrics = evaluate(args.model_dir, net, test_loader, device)
     save_path = os.path.join(args.model_dir, "test_metrics_{}.json".format(args.pretrained))
     utils.save_dict_to_json(test_metrics, save_path)
