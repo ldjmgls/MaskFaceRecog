@@ -65,7 +65,7 @@ def embedding_dist(embed1: np.ndarray, embed2: np.ndarray) -> torch.Tensor:
     embeds = []
 
     for i in range(embed1.shape[0]):
-        embeds.append(cos(embed1.reshape(1, -1), embed2.reshape(1, -1)))
+        embeds.append(cos(embed1.reshape(1, -1), embed2.reshape(1, -1)).detach().cpu().numpy()[0])
       
     return embeds
 
