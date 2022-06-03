@@ -9,6 +9,9 @@ from torch.utils.data import DataLoader
 import torchvision.transforms as transforms
 import torchvision.transforms.functional as TF
 import os
+import re
+import glob
+from numpy.random import choice
 from os.path import exists, dirname, basename, join
 from random import random
 
@@ -108,16 +111,21 @@ class ValDataset(ImageFolder):
         # get all sample nums
         class_folder = dirname(gen_path)
         sample_filename = basename(gen_path)
-        sample_num = re.compile('.+\/([0-9]+)\_N95\.jpg').findall(sample_filename)[0] if sample_filename.endswith('N95.jpg') else re.compile('.+\/([0-9]+).jpg').findall(sample_filename)[0]
+
+        # print(class_folder, sample_filename)
+        # print(re.compile('.+\/([0-9]+)\_N95\.jpg').findall(sample_filename), re.compile('.+\/([0-9]+).jpg').findall(sample_filename))
+        sample_num = sample_filename[:-7] if sample_filename.endswith('N95.jpg') else sample_filename[:-4]
+        # sample_num = re.compile('.+\/([0-9]+)\_N95\.jpg').findall(sample_filename)[0] if sample_filename.endswith('N95.jpg') else re.compile('.+\/([0-9]+).jpg').findall(sample_filename)[0]
         all_sample_nums = [re.compile('.+\/([0-9]+)\_N95\.jpg').findall(e)[0] for e in list(filter(re.compile('.+[0-9]+\_N95\.jpg').match, glob.glob(f'{class_folder}/*.jpg')))]
-        all_sample_nums.remove(sample_num)
-        if gen_path.endswith('_N95.jpg'):
-            # this is an masked image
-            # find a unmasked image in same class BUT not same sample's unmasked image
-            gen_unmasked_path = join(class_folder, choice(all_sample_nums), '.jpg')
-        else:
-            # this is an unmasked image
+        
+        try:
+            all_sample_nums.remove(sample_num)
+        except:
             pass
+
+        
+
+        gen_unmasked_path = join(class_folder, choice(all_sample_nums) + '.jpg')
 
         # Loading data samples to genuine and imposter
         if exists(masked_path) and exists(gen_unmasked_path):
