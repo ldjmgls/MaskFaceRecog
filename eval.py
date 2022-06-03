@@ -31,7 +31,8 @@ def generate_embeddings(net, target, data):
     # num_samples = data.shape[0]
 
     img = (((data / 255) - 0.5) / 0.5)
-    y_pred = net(img, target)[1]
+    y_pred = net(img, target, inference=True)[1]
+    # print(y_pred)
 
     return y_pred
 
@@ -65,7 +66,8 @@ def embedding_dist(embed1: np.ndarray, embed2: np.ndarray) -> torch.Tensor:
     embeds = []
 
     for i in range(embed1.shape[0]):
-        embeds.append(cos(embed1.reshape(1, -1), embed2.reshape(1, -1)).detach().cpu().numpy()[0])
+        # embeds.append(1 - torch.cdist(embed1.reshape(1, -1), embed2.reshape(1, -1)).detach().cpu().numpy()[0][0])
+        embeds.append(cos(embed1[i].reshape(1, -1), embed2[i].reshape(1, -1)).detach().cpu().numpy()[0])
       
     return embeds
 
