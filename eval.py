@@ -39,13 +39,10 @@ def embedding_dist(embed1: np.ndarray, embed2: np.ndarray) -> torch.Tensor:
     :param embed2: the second embedding
     :return distance between embed1 and embed2
     """
-    # return 1 - torch.cdist(torch.from_numpy(embed1).reshape(1, -1), torch.from_numpy(embed2).reshape(1, -1)) / 2
-    cos = torch.nn.CosineSimilarity()
     embeds = []
 
     for i in range(embed1.shape[0]):
-        # embeds.append(1 - torch.cdist(embed1.reshape(1, -1), embed2.reshape(1, -1)).detach().cpu().numpy()[0][0])
-        embeds.append(cos(embed1[i].reshape(1, -1), embed2[i].reshape(1, -1)).detach().cpu().numpy()[0])
+      embeds.append(1 - torch.cdist(embed1[i].reshape(1, -1), embed2[i].reshape(1, -1)).detach().cpu().numpy()[0][0] / 2)
       
     return embeds
 
