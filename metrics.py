@@ -41,7 +41,9 @@ def evaluate_metrics(model_dir: str, gscores: list, iscores: list, clf_name: str
         "EER": stats.eer,
         "AUC": stats.auc,
         "FMR100": stats.fmr100,
-        "FMR10": stats.fmr10
+        "FMR10": stats.fmr10,
+        "Gmean": stats.gmean,
+        "Imean": stats.imean
     }
 
     if print_results:
