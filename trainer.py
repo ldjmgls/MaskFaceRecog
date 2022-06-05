@@ -77,13 +77,16 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, resume = False
             input, input_masked, label_id, label_mask = input.to(device), input_masked.to(device), label_id.to(device), label_mask.to(device)
             
             optimizer.zero_grad()
-            # unmasked: L_arc + lambda * L_ce
+            # L_unmasked: L_arc + lambda * L_ce
             output, embed1, embed2, mask = net(input, label_id)
-            loss = criterion(output, label_id) + 0.1 * criterion(mask * 0, label_mask)
-            # masked: L_arc + lambda * L_ce
+            loss = criterion(output, label_id) + 0.1 * criterion(mask * 0, label_mask)      # lambda = 0.1
+            
+            # L_masked: L_arc + lambda * L_ce
             output_m, embed1_m, embed2_m, mask_m = net(input_masked, label_id)
             loss += criterion(output_m, label_id) + 0.1 * criterion(mask_m, label_mask)
-            loss /= 2
+            
+            # L_comb = alpha * L_mse * beta * (L_masked + L_unmasked)
+            loss /= 2   #
             loss += MSE(embed1, embed1_m) / 3
             loss.backward()
             optimizer.step()
