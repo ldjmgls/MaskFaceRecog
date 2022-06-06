@@ -28,6 +28,7 @@ class FocusFace(nn.Module):
             y2 = self.fc2(embed2.view(embed2.shape[0], -1))
         
         return None, embed1, None, F.softmax(y2)[:, 1]
+        # return None, embed1, None, F.softmax(y2, dim = 1)[:, 1]
 
 class EmbeddingHead(nn.Module):
     """
