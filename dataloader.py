@@ -90,7 +90,7 @@ class ValDataset(ImageFolder):
 
     def __getitem__(self, index):
         """
-        Gives a tuple where the first element contains pair of image of the same person, and the second contains pair of image of different person
+        Gives a tuple where the first element contains pair of image of the same person, and the second contains pair of image of different people
         :params index (int): the index of sample being retrieved
         """
         gen_path, gen_target = self.imgs[index]
@@ -106,9 +106,10 @@ class ValDataset(ImageFolder):
             im_unmasked_path = im_path.replace('.jpg', '_N95.jpg') if im_path.endswith('_N95.jpg') else im_path
             im_unmasked_path = im_unmasked_path if exists(im_unmasked_path) else None
         
+        # The masked image path
         masked_path = gen_path if gen_path.endswith('_N95.jpg') else gen_path.replace('.jpg', '_N95.jpg')
         
-        # get all sample nums
+        # Generating the unmasked image path
         class_folder = dirname(gen_path)
         sample_filename = basename(gen_path)
         
@@ -116,6 +117,7 @@ class ValDataset(ImageFolder):
         pool = list(filter(re.compile('.+[0-9]+\_N95\.jpg').match, glob.glob(f'{class_folder}/*.jpg')))
         all_sample_nums = [file_name for file_name in pool if file_name.endswith('N95.jpg')]
 
+        # Cases when there is only one sample in the directory of a person
         try:
           if len(all_sample_nums) <= 2:
             all_sample_nums.remove(sample_num)
@@ -124,7 +126,7 @@ class ValDataset(ImageFolder):
 
         gen_unmasked_path = choice(all_sample_nums)
 
-        # Loading data samples to genuine and imposter
+        # Loading data samples to genuine dataset
         if exists(masked_path) and exists(gen_unmasked_path):
             masked_sample = self.transform(self.loader(masked_path))
             gen_unmasked_sample = self.transform(self.loader(gen_unmasked_path))
@@ -134,7 +136,7 @@ class ValDataset(ImageFolder):
             print(masked_path, masked_path, gen_unmasked_path, exists(masked_path), exists(gen_unmasked_path))
             genuine = self.__getitem__(int(random()) * self.__len__())[0]    # If no genuine, recursively find random indices until there is genuine data
         
-        # Imposter
+        # Loading data samples to imposter dataset
         if exists(masked_path):
             masked_sample = self.transform(self.loader(masked_path))
             im_unmasked_sample = self.transform(self.loader(im_unmasked_path))
