@@ -1,5 +1,5 @@
 # MaskFaceRecog
-Final Project for UW CSE576: Computer Vision Sp22
+Final Project for UW CSE576: Computer Vision Sp22 <br>
 Contributors: Matthew Chau, Ruby Lin, Sree Prasanna Rajagopal.<br>
 
 Traditional face recognition approaches struggle to accurately identify individuals with masks as they occlude critical facial features contribute to recognition. This project is a realization of masked face recognition following FocusFace architecture and experiments were carried out on our own augmented dataset. Since real-world masked faces are not sufficient, we created our own based on the MS1MV2 (MS1M-ArcFace) dataset. IResNet-50 and IResNet-100 were used as the backbone networks. <br>
