@@ -103,28 +103,28 @@ def train(net, train_loader, val_loader, n_epochs, lr, model_dir, resume = False
         logging.info("- Training loss: {:.9f}".format(total_loss / total_step))
         
         # Run for 1 epoch on validation set
-        # logging.info("- Start validation ...")
-        # metrics = evaluate(model_dir, net, val_loader, device)
-        # logging.info("- Validation metrics: {}".format(metrics))
-        # last_json_path = os.path.join(model_dir, "val_metrics_last.json")
-        # utils.save_dict_to_json(metrics, last_json_path)
+        logging.info("- Start validation ...")
+        metrics = evaluate(model_dir, net, val_loader, device)
+        logging.info("- Validation metrics: {}".format(metrics))
+        last_json_path = os.path.join(model_dir, "val_metrics_last.json")
+        utils.save_dict_to_json(metrics, last_json_path)
         
-        is_best = False
-        # is_best = metrics["FMR100"] < best_score
-        # if metrics["FMR100"] < best_score:
-        #     logging.info("- Found new best FMR100: {}".format(metrics["FMR100"]))
-        #     best_score = metrics["FMR100"]
-        #     patience = 1
-        #     best_json_path = os.path.join(model_dir, "val_metrics_best.json")
-        #     logging.info("- Found best val metrics: {}".format(metrics))
-        #     utils.save_dict_to_json(metrics, best_json_path)
-        # else:
-        #     if patience == 0:
-        #         patience = 1
-        #         rate_decrease /= 10
-        #         optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
-        #         logging.info("- New Learning Rate: {}".format(lr * rate_decrease))
-        #     else: patience -= 1    
+        # is_best = False
+        is_best = metrics["FMR100"] < best_score
+        if metrics["FMR100"] < best_score:
+            logging.info("- Found new best FMR100: {}".format(metrics["FMR100"]))
+            best_score = metrics["FMR100"]
+            patience = 1
+            best_json_path = os.path.join(model_dir, "val_metrics_best.json")
+            logging.info("- Found best val metrics: {}".format(metrics))
+            utils.save_dict_to_json(metrics, best_json_path)
+        else:
+            if patience == 0:
+                patience = 1
+                rate_decrease /= 10
+                optimizer = optim.SGD(param, lr * rate_decrease, weight_decay = 5e-4, momentum = 0.9)
+                logging.info("- New Learning Rate: {}".format(lr * rate_decrease))
+            else: patience -= 1    
         # Save weights
         utils.save_checkpoint({"epoch": epoch + 1, 
                             "state_dict": net.state_dict(),
