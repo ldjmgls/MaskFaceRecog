@@ -24,7 +24,7 @@ We used the **pyeer** package for generating Biometric systems evaluation metric
 - **IMean**: the mean of the imposter scores <br>
 - **EER**: the Equal Error Rate <br>
 - **AUC**: the Area Under ROC Curve <br>
-- **FMR100** and **FMR10**: the lowest FNMR (False non-match Rate) for FMR $\leq 1.0 \%$ and FMR $\leq 10.0\%$.
+- **FMR100** and **FMR10**: the lowest FNMR (False non-match Rate) for FMR  $\leq 1.0 \% $ and FMR  $\leq 10.0\% $.
 
 ## References
 P. C. Neto, F. Boutros, J. R. Pinto, N. Damer, A. F. Sequeira, and J. S. Cardoso. "FocusFace: Multi- task Contrastive Learning for Masked Face Recognition," 2021 16th IEEE International Conference on Automatic Face and Gesture Recognition (FG 2021), 2021, pp. 01-08
