@@ -6,7 +6,6 @@ Traditional face recognition approaches struggle to accurately identify individu
 
 
 ## Repo structure
-`main.py`: ~~end-to-end training and evaluation on the datasets using our model~~ Ignore this for now <br>
 `dataloader.py`: load masked/unmasked face image dataset <br>
 `trainer.py`: train the model <br>
 `eval.py`: evaluate the model <br>
@@ -30,5 +29,5 @@ We used the **pyeer** package for generating Biometric systems evaluation metric
 ## References
 P. C. Neto, F. Boutros, J. R. Pinto, N. Damer, A. F. Sequeira, and J. S. Cardoso. "FocusFace: Multi- task Contrastive Learning for Masked Face Recognition," 2021 16th IEEE International Conference on Automatic Face and Gesture Recognition (FG 2021), 2021, pp. 01-08
 
-Original Paper: https://arxiv.org/abs/2110.14940
+Original Paper: https://arxiv.org/abs/2110.14940 \\
 Original Github Repo: https://github.com/NetoPedro/FocusFace
