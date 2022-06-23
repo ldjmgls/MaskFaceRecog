@@ -28,12 +28,7 @@ We used the **pyeer** package for generating Biometric systems evaluation metric
 - **FMR100** and **FMR10**: the lowest FNMR (False non-match Rate) for FMR $\leq 1.0 \%$ and FMR $\leq 10.0\%$.
 
 ## References
-[FocusFace Official Repo](https://github.com/NetoPedro/FocusFace)
-@inproceedings{neto2021focusface,
-  title={FocusFace: Multi-task Contrastive Learning for Masked Face Recognition},
-  author={Neto, Pedro C and Boutros, Fadi and Pinto, Jo{\~a}o Ribeiro and Darner, Naser and Sequeira, Ana F and Cardoso, Jaime S},
-  booktitle={2021 16th IEEE International Conference on Automatic Face and Gesture Recognition (FG 2021)},
-  pages={01--08},
-  year={2021},
-  organization={IEEE}
-}
+P. C. Neto, F. Boutros, J. R. Pinto, N. Damer, A. F. Sequeira, and J. S. Cardoso. "FocusFace: Multi- task Contrastive Learning for Masked Face Recognition," 2021 16th IEEE International Conference on Automatic Face and Gesture Recognition (FG 2021), 2021, pp. 01-08
+
+Original Paper: https://arxiv.org/abs/2110.14940
+Original Github Repo: https://github.com/NetoPedro/FocusFace
