@@ -29,3 +29,11 @@ We used the **pyeer** package for generating Biometric systems evaluation metric
 
 ## References
 [FocusFace Official Repo](https://github.com/NetoPedro/FocusFace)
+@inproceedings{neto2021focusface,
+  title={FocusFace: Multi-task Contrastive Learning for Masked Face Recognition},
+  author={Neto, Pedro C and Boutros, Fadi and Pinto, Jo{\~a}o Ribeiro and Darner, Naser and Sequeira, Ana F and Cardoso, Jaime S},
+  booktitle={2021 16th IEEE International Conference on Automatic Face and Gesture Recognition (FG 2021)},
+  pages={01--08},
+  year={2021},
+  organization={IEEE}
+}
