@@ -1,10 +1,12 @@
 import json
 import logging
 import os
-import sys
 import shutil
+import sys
+
 import matplotlib.pyplot as plt
 import torch
+
 
 def set_logger(log_path):
     """
@@ -25,13 +27,15 @@ def set_logger(log_path):
     if not logger.handlers:
         # Logging to a file
         file_handler = logging.FileHandler(log_path)
-        file_handler.setFormatter(logging.Formatter("%(asctime)s:%(levelname)s: %(message)s"))
+        file_handler.setFormatter(logging.Formatter(
+            "%(asctime)s:%(levelname)s: %(message)s"))
         logger.addHandler(file_handler)
 
         # Logging to console
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setFormatter(logging.Formatter("%(message)s"))
         logger.addHandler(stream_handler)
+
 
 def save_dict_to_json(d, json_path):
     """Saves dict of floats in json file
@@ -43,6 +47,7 @@ def save_dict_to_json(d, json_path):
         # We need to convert the values to float for json (it doesn't accept np.array, np.float, )
         d = {k: float(v) for k, v in d.items()}
         json.dump(d, f, indent=4)
+
 
 def save_checkpoint(state, is_best, checkpoint):
     """
@@ -56,7 +61,8 @@ def save_checkpoint(state, is_best, checkpoint):
     """
     filepath = os.path.join(checkpoint, 'last.pth.tar')
     if not os.path.exists(checkpoint):
-        logging.info("- Checkpoint Directory does not exist! Making directory {}".format(checkpoint))
+        logging.info(
+            "- Checkpoint Directory does not exist! Making directory {}".format(checkpoint))
         os.mkdir(checkpoint)
     else:
         logging.info("- Checkpoint Directory exists!")
@@ -66,7 +72,8 @@ def save_checkpoint(state, is_best, checkpoint):
         shutil.copyfile(filepath, os.path.join(checkpoint, 'best.pth.tar'))
         logging.info("- Save the best model!")
 
-def load_checkpoint(checkpoint, model, optimizer = None):
+
+def load_checkpoint(checkpoint, model, optimizer=None):
     """
     Loads model parameters (state_dict) from file_path. If optimizer is provided, loads state_dict of
     optimizer assuming it is present in checkpoint.
@@ -86,6 +93,7 @@ def load_checkpoint(checkpoint, model, optimizer = None):
 
     return checkpoint
 
+
 def plot_trend(mode, value, ylabel, model_dir):
     """
     Args:
@@ -99,4 +107,3 @@ def plot_trend(mode, value, ylabel, model_dir):
     plt.ylabel(ylabel)
     filepath = os.path.join(model_dir, mode + "_" + ylabel + ".png")
     plt.savefig(filepath)
-

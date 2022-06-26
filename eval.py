@@ -128,6 +128,7 @@ if __name__ == '__main__':
 
     identities = 601
     net = model.FocusFace(identities).to(device)
+    
     # Load weights from the saved file
     pretrain_path = os.path.join(args.model_dir, args.pretrained + ".pth.tar")
     logging.info("Loading parameters from {}".format(pretrain_path))
